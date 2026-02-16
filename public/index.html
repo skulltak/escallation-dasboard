@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escalation Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --secondary: #64748b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #0f172a;
+            --light: #f8fafc;
+
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.6);
+            --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+
+            --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #cbebff 100%);
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+        }
+
+        /* Ambient Background shapes */
+        body::before {
+            content: '';
+            position: absolute;
+            top: -20%;
+            left: -10%;
+            width: 50%;
+            height: 50%;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, rgba(99, 102, 241, 0) 70%);
+            z-index: -1;
+            filter: blur(60px);
+            animation: pulseShape 10s infinite alternate;
+        }
+
+        body::after {
+            content: '';
+            position: absolute;
+            bottom: -20%;
+            right: -10%;
+            width: 50%;
+            height: 50%;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0) 70%);
+            z-index: -1;
+            filter: blur(60px);
+            animation: pulseShape 10s infinite alternate-reverse;
+        }
+
+        @keyframes pulseShape {
+            from {
+                transform: scale(1);
+            }
+
+            to {
+                transform: scale(1.2);
+            }
+        }
+
+        /* Typography & Utilities */
+        h1,
+        h2,
+        h3,
+        h4,
+        p {
+            margin: 0;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .flex-col {
+            flex-direction: column;
+        }
+
+        .items-center {
+            align-items: center;
+        }
+
+        .justify-between {
+            justify-content: space-between;
+        }
+
+        .gap-2 {
+            gap: 0.5rem;
+        }
+
+        .gap-4 {
+            gap: 1rem;
+        }
+
+        .font-bold {
+            font-weight: 700;
+        }
+
+        .text-sm {
+            font-size: 0.875rem;
+        }
+
+        .text-xs {
+            font-size: 0.75rem;
+        }
+
+        .text-muted {
+            color: var(--text-muted);
+        }
+
+        .w-full {
+            width: 100%;
+        }
+
+        .cursor-pointer {
+            cursor: pointer;
+        }
+
+        /* Login Screen - Premium Dark Theme */
+        #loginScreen {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            background: #0f172a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* Animated Background for Login */
+        .login-bg {
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.15) 0%, transparent 25%);
+            z-index: 1;
+            animation: pulseBg 8s ease-in-out infinite alternate;
+        }
+
+        .login-card {
+            background: rgba(30, 41, 59, 0.7);
+            padding: 3rem;
+            border-radius: 1.5rem;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+            position: relative;
+        }
+
+        .login-title {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #6366f1, #a855f7, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+        }
+
+        .login-subtitle {
+            color: #94a3b8;
+            margin-bottom: 2.5rem;
+            font-size: 0.95rem;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.25rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.75rem;
+            background: rgba(15, 23, 42, 0.6);
+            color: white;
+            outline: none;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .login-input:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        .btn-login {
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 1rem;
+            transition: all 0.3s;
+            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.4);
+            filter: brightness(1.1);
+        }
+
+        @keyframes pulseBg {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* Dashboard Layout */
+        #app {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            padding: 1rem;
+            gap: 1rem;
+        }
+
+        /* Sidebar - Glass Panel */
+        .sidebar {
+            width: 260px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-lg);
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+
+        .brand {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary) 0%, #818cf8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 2.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .brand-icon {
+            font-size: 1.5rem;
+            filter: drop-shadow(0 2px 4px rgba(99, 102, 241, 0.4));
+        }
+
+        .nav-item {
+            padding: 0.85rem 1.25rem;
+            border-radius: 1rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.5);
+            color: var(--primary);
+            transform: translateX(4px);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, var(--primary) 0%, #818cf8 100%);
+            color: white;
+            box-shadow: var(--shadow-glow);
+        }
+
+        .user-profile {
+            margin-top: auto;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #4f46e5, #ec4899);
+            color: white;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 1.5rem;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .top-bar {
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2.5rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: var(--dark);
+        }
+
+        .dashboard-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem 2.5rem;
+        }
+
+        .dashboard-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .dashboard-scroll::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 3px;
+        }
+
+        /* Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.6);
+            padding: 1.75rem;
+            border-radius: 1.25rem;
+            border: 1px solid white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: slideInUp 0.6s ease backwards;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: var(--shadow-lg);
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .stat-card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .stat-card:nth-child(2) {
+            animation-delay: 0.15s;
+        }
+
+        .stat-card:nth-child(3) {
+            animation-delay: 0.2s;
+        }
+
+        .stat-card:nth-child(4) {
+            animation-delay: 0.25s;
+        }
+
+        .stat-info h4 {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-info .value {
+            font-size: 2.25rem;
+            font-weight: 800;
+            margin-top: 0.5rem;
+            background: linear-gradient(135deg, var(--text-main) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .icon-box {
+            width: 56px;
+            height: 56px;
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover .icon-box {
+            transform: rotate(10deg) scale(1.1);
+        }
+
+        .bg-blue-100 {
+            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+            color: var(--primary);
+        }
+
+        .bg-green-100 {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            color: var(--success);
+        }
+
+        .bg-yellow-100 {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: var(--warning);
+        }
+
+        .bg-red-100 {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: var(--danger);
+        }
+
+        /* Charts */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+            height: 360px;
+        }
+
+        .chart-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 1.25rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            animation: slideInUp 0.7s ease backwards;
+            animation-delay: 0.3s;
+        }
+
+        .chart-card:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .chart-header h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .chart-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Table Section */
+        .table-section {
+            background: white;
+            border-radius: 1.25rem;
+            box-shadow: var(--shadow-md);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: slideInUp 0.8s ease backwards;
+            animation-delay: 0.4s;
+            height: auto;
+            min-height: 450px;
+        }
+
+        .table-header {
+            padding: 1.25rem 2rem;
+            border-bottom: 1px solid var(--border);
+            background: #fdfdfd;
+        }
+
+        .action-group {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn-sm,
+        .form-control {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border);
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-sm:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary-sm {
+            background: var(--primary);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 6px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-primary-sm:hover {
+            background: var(--primary-hover);
+            box-shadow: 0 6px 10px rgba(79, 70, 229, 0.4);
+            color: white;
+        }
+
+        .search-input {
+            padding-left: 2.5rem;
+            width: 260px;
+            background-color: #f8fafc;
+        }
+
+        .search-input:focus {
+            background: white;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        .table-container {
+            flex: 1;
+            overflow: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        th {
+            text-align: left;
+            padding: 1rem 1.5rem;
+            background: #f8fafc;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.9rem;
+            vertical-align: middle;
+            color: var(--text-main);
+            transition: background 0.1s;
+        }
+
+        tr:hover td {
+            background-color: #f8fafc;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Status Badges */
+        .badge {
+            padding: 0.35rem 0.85rem;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+
+        .badge-open {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .badge-progress {
+            background: rgba(245, 158, 11, 0.1);
+            color: #d97706;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .badge-closed {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        /* Slide-over Drawer (New Modal) */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 500px;
+            background: white;
+            box-shadow: -10px 0 25px -5px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
+            transform: translateX(100%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            border-radius: 1.5rem 0 0 1.5rem;
+            border-left: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .modal-overlay.open .modal {
+            transform: translateX(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--dark);
+        }
+
+        .close-btn {
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: color 0.2s;
+        }
+
+        .close-btn:hover {
+            color: var(--danger);
+        }
+
+        /* Professional Form Layout */
+        .form-section-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            font-weight: 700;
+            margin: 1.5rem 0 0.75rem 0;
+            padding-bottom: 0.25rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        /* Modal */
+        .modal {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 2.5rem;
+            box-shadow: var(--shadow-2xl);
+            /* using lg placeholder */
+            transform: translateY(20px) scale(0.95);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .modal-overlay.open .modal {
+            transform: translateY(0) scale(1);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(79, 70, 229, 0.3);
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 12px rgba(79, 70, 229, 0.4);
+        }
+
+        /* Animations */
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Notification Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Login Screen -->
+    <div id="loginScreen">
+        <div class="login-bg"></div>
+        <div class="login-card">
+            <div class="login-item">
+                <div class="login-title">Escalation</div>
+                <div class="login-subtitle">Sign in to your dashboard</div>
+            </div>
+            <div class="login-item">
+                <input type="text" id="loginUser" class="login-input" placeholder="Username / Branch ID">
+            </div>
+            <div class="login-item">
+                <input type="password" id="loginPass" class="login-input" placeholder="Password">
+            </div>
+            <div class="login-item">
+                <button onclick="handleLogin()" class="btn-login">Access Dashboard</button>
+            </div>
+            <div id="loginError" class="login-item"
+                style="color: #ef4444; margin-top: 1rem; display: none; font-size: 0.9rem;">
+                Invalid credentials
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="app" class="hidden">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-icon">🚀</div>
+                <div>Escalation</div>
+            </div>
+
+            <nav class="flex-col gap-2">
+                <div class="nav-item active" id="nav-dashboard" onclick="showView('dashboard')">
+                    <span>📊</span> Dashboard
+                </div>
+                <div class="nav-item" id="nav-reports" onclick="showView('reports')">
+                    <span>📈</span> Reports
+                </div>
+            </nav>
+
+            <div class="user-profile">
+                <div class="avatar" id="userAvatar">A</div>
+                <div style="flex: 1; overflow: hidden;">
+                    <div class="text-sm font-bold"
+                        style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Welcome</div>
+                    <div class="text-xs text-muted" id="userName"
+                        style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">...</div>
+                </div>
+                <div class="cursor-pointer" onclick="logout()" title="Logout">
+                    <span>🚪</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Content -->
+        <main class="main-content">
+            <!-- Top Header -->
+            <header class="top-bar">
+                <h2 class="page-title" id="pageTitle">Overview</h2>
+                <div class="flex items-center gap-4">
+                    <div style="position: relative;">
+                        <input type="text" placeholder="Quick Search..."
+                            style="padding: 0.6rem 1rem 0.6rem 2.5rem; border-radius: 99px; border: 1px solid rgba(0,0,0,0.1); background: rgba(255,255,255,0.5); width: 220px; font-size: 0.9rem; transition: all 0.2s;"
+                            onfocus="this.style.background='white'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.05)';"
+                            onblur="this.style.background='rgba(255,255,255,0.5)'; this.style.boxShadow='none';">
+                        <span
+                            style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); opacity: 0.5;">🔍</span>
+                    </div>
+                    <div style="width: 1px; height: 24px; background: rgba(0,0,0,0.1);"></div>
+                    <div class="text-sm font-bold" id="currentDate"></div>
+                </div>
+            </header>
+
+            <!-- Dashboard View -->
+            <div id="view-dashboard" class="dashboard-scroll">
+                <!-- Stats Row -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h4>Total Cases</h4>
+                            <div class="value" id="totalVal">0</div>
+                        </div>
+                        <div class="icon-box bg-blue-100"></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h4>Open / New</h4>
+                            <div class="value" id="openVal">0</div>
+                        </div>
+                        <div class="icon-box bg-red-100">🔥</div>
+                    </div>
+                    <div class="stat-card" style="border: 1px solid var(--warning);">
+                        <div class="stat-info">
+                            <h4 style="color: var(--warning);">Aging (> 5 Days)</h4>
+                            <div class="value" id="agingVal" style="-webkit-text-fill-color: var(--warning);">0</div>
+                        </div>
+                        <div class="icon-box bg-yellow-100">⚠️</div>
+                        <div
+                            style="position: absolute; top: 0; right: 0; bottom: 0; width: 4px; background: var(--warning); border-radius: 0 1.25rem 1.25rem 0;">
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h4>Closed</h4>
+                            <div class="value" id="closedVal">0</div>
+                        </div>
+                        <div class="icon-box bg-green-100">✅</div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>Branch Escalation</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="branchChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>Status Mix</h3>
+                        </div>
+                        <div class="chart-container" style="max-height: 250px;">
+                            <canvas id="statusChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="table-section">
+                    <div class="table-header">
+                        <div class="flex items-center gap-4">
+                            <h3 class="font-bold">Recent Escalations</h3>
+                            <button class="btn-sm btn-primary-sm" onclick="openModal()">+ New Case</button>
+                        </div>
+                        <div class="action-group">
+                            <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search cases..."
+                                onkeyup="renderTable()">
+                            <input type="date" id="dateFilter" class="btn-sm" onchange="renderTable()"
+                                style="max-width: 130px;">
+                            <select id="branchFilter" class="btn-sm" onchange="renderTable()" style="max-width: 130px;">
+                                <option value="">All Branches</option>
+                            </select>
+                            <select id="statusFilter" class="btn-sm" onchange="renderTable()">
+                                <option value="">All Status</option>
+                                <option>Open</option>
+                                <option>Closed</option>
+                            </select>
+                            <select id="agingFilter" class="btn-sm" onchange="renderTable()" style="max-width: 130px;">
+                                <option value="">All Aging</option>
+                                <option value="0-5">&lt; 5 Days</option>
+                                <option value="6-10">6 - 10 Days</option>
+                                <option value="11+">&gt; 10 Days</option>
+                            </select>
+                            <input type="file" id="csvFileInput" accept=".csv, .xlsx, .xls" class="hidden"
+                                onchange="handleImport(this)">
+                            <button class="btn-sm" onclick="document.getElementById('csvFileInput').click()">📤
+                                Import</button>
+                            <button class="btn-sm" onclick="exportCSV()">📥 Export</button>
+                            <button class="btn-sm" style="color: var(--danger); border-color: var(--danger);"
+                                onclick="confirmClear()">🗑️ Clear</button>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>ID</th>
+                                    <th>Branch</th>
+                                    <th>Brand</th>
+                                    <th>Reason</th>
+                                    <th>Aging (Days)</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reports View -->
+            <div id="view-reports" class="dashboard-scroll hidden">
+                <div class="table-section" style="height: 100%;">
+                    <div class="table-header">
+                        <div class="flex items-center gap-4">
+                            <h3 class="font-bold">Branch Performance Summary</h3>
+                        </div>
+                        <div class="action-group">
+                            <input type="date" id="reportDateFilter" class="btn-sm" onchange="renderReports()"
+                                style="max-width: 130px;">
+                            <button class="btn-sm" onclick="exportReport()">📥 Export Report</button>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table id="reportTable">
+                            <thead>
+                                <tr>
+                                    <th>Branch</th>
+                                    <th>Total Cases</th>
+                                    <th>Open</th>
+                                    <th>Closed</th>
+                                    <th>Avg Aging (Days)</th>
+                                    <th>Compliance</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reportBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Slide-over Drawer (formerly Modal) -->
+    <div class="modal-overlay" id="entryModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">New Case</h3>
+                <div class="close-btn" onclick="closeModal()">&times;</div>
+            </div>
+            <form id="escForm" onsubmit="event.preventDefault(); saveEntry();"
+                style="flex: 1; display: flex; flex-direction: column;">
+                <input type="hidden" id="fEditingId">
+                <div class="dashboard-scroll" style="padding: 0; flex: 1; margin-bottom: 1rem;">
+
+                    <div class="form-section-title" style="margin-top: 0;">Case Identification</div>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label>Reference ID</label>
+                            <input type="text" required class="form-control" id="fId" placeholder="#10234">
+                        </div>
+                        <div class="form-group">
+                            <label>Date Logged</label>
+                            <input type="date" required class="form-control" id="fDate">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Branch / Location</label>
+                        <select class="form-control" id="fBranch" required></select>
+                    </div>
+
+                    <div class="form-section-title">Product & Customer</div>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label>Brand / Model</label>
+                            <input type="text" class="form-control" id="fBrand" placeholder="e.g. Sony">
+                        </div>
+                        <div class="form-group">
+                            <label>Region / City</label>
+                            <input type="text" class="form-control" id="fCity">
+                        </div>
+                    </div>
+
+                    <div class="form-section-title">Status & Resolution</div>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label>Current Status</label>
+                            <select class="form-control" id="fStatus">
+                                <option>Open</option>
+                                <option>Closed</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Aging Days</label>
+                            <input type="number" class="form-control" id="fAging" min="0" value="0">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Primary Issue / Reason</label>
+                        <input type="text" class="form-control" id="fReason"
+                            placeholder="Brief description of the issue">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Technician Remarks</label>
+                        <textarea class="form-control" id="fRemark" rows="4"
+                            placeholder="Detailed notes about the case..."></textarea>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2" style="border-top: 1px solid var(--border); padding-top: 1.5rem;">
+                    <button type="button" onclick="closeModal()" class="btn-sm">Cancel</button>
+                    <button type="submit" class="btn-primary" style="flex: 1;">Save Record</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>

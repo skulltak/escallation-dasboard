@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: escalation-dashboard
+    runtime: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: MONGO_URI
+        sync: false
+      - key: PORT
+        value: 10000

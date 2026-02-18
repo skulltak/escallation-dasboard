@@ -100,7 +100,7 @@ const startServer = async () => {
         console.log('✅ MongoDB Connected');
 
         app.listen(PORT, '0.0.0.0', () => {
-            console.log(`🚀 Server running on port ${PORT}`);
+            console.log(`🚀 Escalation Dashboard v4.0.2 - 3D PRO Live on port ${PORT}`);
         });
     } catch (err) {
         console.error('❌ MongoDB Connection Error:', err.message);

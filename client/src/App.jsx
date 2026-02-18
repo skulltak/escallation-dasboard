@@ -445,7 +445,9 @@ const App = () => {
             showToast(`Successfully imported ${entries.length} records`, 'success');
             loadData();
           } catch (err) {
-            showToast('Import failed: Server error', 'error');
+            console.error("Bulk upload error:", err);
+            const errMsg = err.response?.data?.message || err.message;
+            showToast(`Import failed: ${errMsg}`, 'error');
           } finally {
             setImporting(false);
           }

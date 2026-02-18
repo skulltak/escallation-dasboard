@@ -17,7 +17,7 @@ app.use((req, res, next) => {
     next();
 });
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
 
 // API Routes
 app.get('/health', (req, res) => res.send('OK'));
@@ -45,10 +45,17 @@ app.post('/api/escalations', async (req, res) => {
 // Bulk create escalations
 app.post('/api/escalations/bulk', async (req, res) => {
     try {
-        const newEscalations = await Escalation.insertMany(req.body);
+        console.log(`📥 Received bulk import request: ${Array.isArray(req.body) ? req.body.length : 0} records`);
+        const newEscalations = await Escalation.insertMany(req.body, { ordered: false });
+        console.log(`✅ Bulk insertion complete: ${newEscalations.length} records saved`);
         res.status(201).json(newEscalations);
     } catch (err) {
-        res.status(400).json({ message: err.message });
+        console.error("❌ Bulk insertion failed:", err.message);
+        res.status(400).json({
+            message: "Some records failed to import",
+            error: err.message,
+            count: err.writeErrors ? err.writeErrors.length : 'unknown'
+        });
     }
 });
 

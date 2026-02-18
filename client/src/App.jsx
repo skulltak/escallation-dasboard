@@ -583,6 +583,19 @@ const App = () => {
     };
   }, [filteredData]);
 
+  const agingBarData = useMemo(() => {
+    const cases = filteredData.filter(d => String(d.status || '').toLowerCase() !== 'closed').slice(0, 20);
+    return {
+      labels: cases.map(d => d.id || d.brand || 'Case'),
+      datasets: [{
+        label: 'Aging (Days)',
+        data: cases.map(d => d.aging || 0),
+        backgroundColor: cases.map(d => d.aging > 5 ? '#ef4444' : '#6366f1'),
+        borderRadius: 4
+      }]
+    };
+  }, [filteredData]);
+
   const doughnutData = useMemo(() => {
     const stats = { open: 0, aging: 0, closed: 0 };
     filteredData.forEach(d => {
@@ -767,17 +780,17 @@ const App = () => {
                   </div>
                 </div>
                 <div className="chart-card">
-                  <h3>Branch Escalation</h3>
+                  <h3>{user?.role === 'ADMIN' ? 'Branch Escalation' : 'Case Aging'}</h3>
                   <div className="chart-container">
-                    <Bar data={chartData} options={{
+                    <Bar data={user?.role === 'ADMIN' ? chartData : agingBarData} options={{
                       responsive: true,
                       maintainAspectRatio: false,
                       plugins: {
                         legend: { display: false }
                       },
                       scales: {
-                        y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
-                        x: { grid: { display: false } }
+                        y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' }, title: user?.role !== 'ADMIN' ? { display: true, text: 'Days' } : undefined },
+                        x: { grid: { display: false }, ticks: user?.role !== 'ADMIN' ? { maxRotation: 45, minRotation: 0, font: { size: 10 } } : undefined }
                       }
                     }} />
                   </div>

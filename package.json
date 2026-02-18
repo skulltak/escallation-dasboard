@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
-    "build": "npm install --prefix client && npm run build --prefix client",
+    "build": "chmod +x render-build.sh && ./render-build.sh",
     "dev": "nodemon server.js"
   },
   "keywords": [],

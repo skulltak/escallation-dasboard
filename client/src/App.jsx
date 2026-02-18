@@ -146,6 +146,7 @@ const App = () => {
   const [data, setData] = useState([]);
   const [view, setView] = useState('dashboard');
   const [loading, setLoading] = useState(false);
+  const [dbStatus, setDbStatus] = useState('Checking...');
   const [importing, setImporting] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -190,10 +191,19 @@ const App = () => {
       setLoading(true);
       const res = await axios.get(API_URL);
       setData(res.data);
+
+      // Also check DB status
+      try {
+        const info = await axios.get('/api/info');
+        setDbStatus(info.data.db_status === 1 ? 'Connected' : 'Offline');
+      } catch (e) {
+        setDbStatus('Error');
+      }
     } catch (err) {
       console.error('Data loading error:', err);
       const errorMsg = err.response?.data?.message || err.message || 'Error loading data';
       showToast(`Load Failed: ${errorMsg}`, 'error');
+      setDbStatus('Offline');
     } finally {
       setLoading(false);
     }
@@ -673,7 +683,14 @@ const App = () => {
 
       <main className={`main-content ${loading ? 'opacity-50' : ''}`}>
         <header className="top-bar">
-          <h2 className="page-title">{view === 'dashboard' ? 'Overview' : 'Reports'} <span style={{ fontSize: '10px', opacity: 0.5, fontWeight: 'normal' }}>(v4.1.3)</span></h2>
+          <div className="flex flex-col">
+            <h2 className="page-title">{view === 'dashboard' ? 'Overview' : 'Reports'} <span style={{ fontSize: '12px', opacity: 0.5, fontWeight: 'normal' }}>(v4.1.4)</span></h2>
+            <div className="text-xs flex items-center gap-1" style={{ opacity: 0.7 }}>
+              Status: <span style={{ color: dbStatus === 'Connected' ? '#10b981' : '#ef4444', fontWeight: 'bold' }}>
+                {dbStatus === 'Connected' ? '🟢 Connected' : '🔴 Database Offline'}
+              </span>
+            </div>
+          </div>
           <div className="flex items-center gap-4">
             <div style={{ position: 'relative' }}>
               <input

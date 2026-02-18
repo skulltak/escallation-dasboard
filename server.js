@@ -81,62 +81,20 @@ app.delete('/api/escalations/:id', async (req, res) => {
     }
 });
 
-// Delete an escalation (already above)
+// Basic Health Check
+app.get('/health', (req, res) => res.send('OK'));
 
-// Comprehensive Debug Route
-app.get('/debug-full', (req, res) => {
-    const fs = require('fs');
-
-    function getAllFiles(dirPath, arrayOfFiles) {
-        let files = fs.readdirSync(dirPath);
-        arrayOfFiles = arrayOfFiles || [];
-        files.forEach(function (file) {
-            if (fs.statSync(dirPath + "/" + file).isDirectory()) {
-                if (file !== 'node_modules' && file !== '.git') {
-                    arrayOfFiles.push({ name: file, type: 'dir', path: dirPath + "/" + file });
-                    arrayOfFiles = getAllFiles(dirPath + "/" + file, arrayOfFiles);
-                }
-            } else {
-                arrayOfFiles.push({ name: file, type: 'file', path: dirPath + "/" + file });
-            }
-        });
-        return arrayOfFiles;
-    }
-
-    try {
-        const structure = getAllFiles(__dirname);
-        res.json({
-            root: __dirname,
-            structure
-        });
-    } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
-});
-
-// Check Client Node Modules
-app.get('/debug-node', (req, res) => {
-    const fs = require('fs');
-    const clientNodePath = path.join(__dirname, 'client', 'node_modules');
-    const exists = fs.existsSync(clientNodePath);
-    res.json({
-        clientNodePath,
-        exists,
-        contents: exists ? fs.readdirSync(clientNodePath).slice(0, 10) : [] // show first 10
-    });
-});
-
-// Static files (Serve after API routes)
-app.use(express.static(path.join(__dirname, 'client', 'dist')));
+// Standard Static serving (ROOT dist)
+app.use(express.static(path.join(__dirname, 'dist')));
 
 // SPA Catch-all (MUST BE LAST)
 app.use((req, res, next) => {
     if (req.url.startsWith('/api')) return next();
-    const indexPath = path.join(__dirname, 'client', 'dist', 'index.html');
+    const indexPath = path.join(__dirname, 'dist', 'index.html');
     res.sendFile(indexPath, (err) => {
         if (err) {
-            console.error("SPA Catch-all Error:", err);
-            res.status(404).send(`FRONTEND ERROR (v4.0.9): File not found at ${indexPath}. Current __dirname is ${__dirname}`);
+            console.error("SPA Error (v4.1.0):", err);
+            res.status(404).send(`[Escalation Dashboard v4.1.0] Deployment Sync Error: Frontend files missing at ${indexPath}. Please ensure the build command succeeded.`);
         }
     });
 });
@@ -149,7 +107,7 @@ const startServer = async () => {
         console.log('✅ MongoDB Connected');
 
         app.listen(PORT, '0.0.0.0', () => {
-            console.log(`🚀 Escalation Dashboard v4.0.7 - 3D PRO Live on port ${PORT}`);
+            console.log(`🚀 Escalation Dashboard v4.1.0 - 3D PRO Live on port ${PORT}`);
         });
     } catch (err) {
         console.error('❌ MongoDB Connection Error:', err.message);

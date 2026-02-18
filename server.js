@@ -86,7 +86,7 @@ app.delete('/api/escalations/:id', async (req, res) => {
 // Debug directory structure on Render
 app.get('/debug-dist', (req, res) => {
     const fs = require('fs');
-    const distPath = path.join(__dirname, 'client/dist');
+    const distPath = path.join(__dirname, 'dist');
     const exists = fs.existsSync(distPath);
     let contents = [];
     if (exists) {
@@ -102,16 +102,16 @@ app.get('/debug-dist', (req, res) => {
 });
 
 // Static files (Serve after API routes)
-app.use(express.static(path.join(__dirname, 'client', 'dist')));
+app.use(express.static(path.join(__dirname, 'dist')));
 
 // SPA Catch-all (MUST BE LAST)
 app.use((req, res, next) => {
     if (req.url.startsWith('/api')) return next();
-    const indexPath = path.join(__dirname, 'client', 'dist', 'index.html');
+    const indexPath = path.join(__dirname, 'dist', 'index.html');
     res.sendFile(indexPath, (err) => {
         if (err) {
             console.error("SPA Catch-all Error:", err);
-            res.status(404).send(`Frontend not found at ${indexPath}. Please check build logs.`);
+            res.status(404).send(`Frontend not found at ${indexPath}. Please check build logs. (v4.0.7)`);
         }
     });
 });
@@ -124,7 +124,7 @@ const startServer = async () => {
         console.log('✅ MongoDB Connected');
 
         app.listen(PORT, '0.0.0.0', () => {
-            console.log(`🚀 Escalation Dashboard v4.0.2 - 3D PRO Live on port ${PORT}`);
+            console.log(`🚀 Escalation Dashboard v4.0.7 - 3D PRO Live on port ${PORT}`);
         });
     } catch (err) {
         console.error('❌ MongoDB Connection Error:', err.message);

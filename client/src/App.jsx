@@ -673,7 +673,7 @@ const App = () => {
 
       <main className={`main-content ${loading ? 'opacity-50' : ''}`}>
         <header className="top-bar">
-          <h2 className="page-title">{view === 'dashboard' ? 'Overview' : 'Reports'}</h2>
+          <h2 className="page-title">{view === 'dashboard' ? 'Overview' : 'Reports'} <span style={{ fontSize: '10px', opacity: 0.5, fontWeight: 'normal' }}>(v4.1.3)</span></h2>
           <div className="flex items-center gap-4">
             <div style={{ position: 'relative' }}>
               <input

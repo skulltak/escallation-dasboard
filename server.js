@@ -83,13 +83,37 @@ app.delete('/api/escalations/:id', async (req, res) => {
 
 // Delete an escalation (already above)
 
+// Debug directory structure on Render
+app.get('/debug-dist', (req, res) => {
+    const fs = require('fs');
+    const distPath = path.join(__dirname, 'client/dist');
+    const exists = fs.existsSync(distPath);
+    let contents = [];
+    if (exists) {
+        contents = fs.readdirSync(distPath);
+    }
+    res.json({
+        cwd: process.cwd(),
+        dirname: __dirname,
+        distPath,
+        exists,
+        contents
+    });
+});
+
 // Static files (Serve after API routes)
-app.use(express.static(path.join(__dirname, 'client/dist')));
+app.use(express.static(path.join(__dirname, 'client', 'dist')));
 
 // SPA Catch-all (MUST BE LAST)
 app.use((req, res, next) => {
     if (req.url.startsWith('/api')) return next();
-    res.sendFile(path.join(__dirname, 'client/dist', 'index.html'));
+    const indexPath = path.join(__dirname, 'client', 'dist', 'index.html');
+    res.sendFile(indexPath, (err) => {
+        if (err) {
+            console.error("SPA Catch-all Error:", err);
+            res.status(404).send(`Frontend not found at ${indexPath}. Please check build logs.`);
+        }
+    });
 });
 
 // Database Connection & Server Start

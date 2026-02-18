@@ -123,7 +123,15 @@ app.use((req, res, next) => {
 const startServer = async () => {
     try {
         console.log('Connecting to MongoDB...');
-        await mongoose.connect(process.env.MONGO_URI);
+        // Check for MONGO_URL (Render default) or MONGO_URI
+        const uri = process.env.MONGO_URL || process.env.MONGO_URI;
+        console.log("Checking Mongo URI:", uri ? "Defined (Hidden for safety)" : "UNDEFINED");
+
+        if (!uri) {
+            throw new Error("MONGO_URL and MONGO_URI are both undefined");
+        }
+
+        await mongoose.connect(uri);
         console.log('✅ MongoDB Connected');
 
         app.listen(PORT, '0.0.0.0', () => {

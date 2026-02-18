@@ -21,6 +21,8 @@ app.use(express.json({ limit: '50mb' }));
 
 // API Routes
 app.get('/health', (req, res) => res.send('OK'));
+app.get('/api/info', (req, res) => res.json({ version: 'v4.1.2', limit: '50mb', time: new Date().toISOString() }));
+
 app.get('/api/escalations', async (req, res) => {
     try {
         const escalations = await Escalation.find().sort({ createdAt: -1 });
@@ -45,6 +47,9 @@ app.post('/api/escalations', async (req, res) => {
 // Bulk create escalations
 app.post('/api/escalations/bulk', async (req, res) => {
     try {
+        if (mongoose.connection.readyState !== 1) {
+            return res.status(503).json({ message: "Database is currently offline. Please check your MONGO_URI configuration in Render." });
+        }
         console.log(`📥 Received bulk import request: ${Array.isArray(req.body) ? req.body.length : 0} records`);
         const newEscalations = await Escalation.insertMany(req.body, { ordered: false });
         console.log(`✅ Bulk insertion complete: ${newEscalations.length} records saved`);
@@ -100,8 +105,8 @@ app.use((req, res, next) => {
     const indexPath = path.join(__dirname, 'dist', 'index.html');
     res.sendFile(indexPath, (err) => {
         if (err) {
-            console.error("SPA Error (v4.1.0):", err);
-            res.status(404).send(`[Escalation Dashboard v4.1.0] Deployment Sync Error: Frontend files missing at ${indexPath}. Please ensure the build command succeeded.`);
+            console.error("SPA Error (v4.1.2):", err);
+            res.status(404).send(`[Escalation Dashboard v4.1.2] Deployment Sync Error: Frontend files missing at ${indexPath}. Please ensure the build command succeeded.`);
         }
     });
 });
@@ -114,12 +119,12 @@ const startServer = async () => {
         console.log('✅ MongoDB Connected');
 
         app.listen(PORT, '0.0.0.0', () => {
-            console.log(`🚀 Escalation Dashboard v4.1.0 - 3D PRO Live on port ${PORT}`);
+            console.log(`🚀 Escalation Dashboard v4.1.2 - 3D PRO Live on port ${PORT}`);
         });
     } catch (err) {
         console.error('❌ MongoDB Connection Error:', err.message);
         app.listen(PORT, '0.0.0.0', () => {
-            console.log(`🚀 Server running on port ${PORT} (Database Offline)`);
+            console.log(`🚀 Server running on port ${PORT} (v4.1.2 - DB Offline)`);
         });
     }
 };

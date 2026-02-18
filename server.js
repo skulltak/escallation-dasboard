@@ -114,17 +114,29 @@ app.get('/debug-full', (req, res) => {
     }
 });
 
+// Check Client Node Modules
+app.get('/debug-node', (req, res) => {
+    const fs = require('fs');
+    const clientNodePath = path.join(__dirname, 'client', 'node_modules');
+    const exists = fs.existsSync(clientNodePath);
+    res.json({
+        clientNodePath,
+        exists,
+        contents: exists ? fs.readdirSync(clientNodePath).slice(0, 10) : [] // show first 10
+    });
+});
+
 // Static files (Serve after API routes)
-app.use(express.static(path.join(__dirname, 'dist')));
+app.use(express.static(path.join(__dirname, 'client', 'dist')));
 
 // SPA Catch-all (MUST BE LAST)
 app.use((req, res, next) => {
     if (req.url.startsWith('/api')) return next();
-    const indexPath = path.join(__dirname, 'dist', 'index.html');
+    const indexPath = path.join(__dirname, 'client', 'dist', 'index.html');
     res.sendFile(indexPath, (err) => {
         if (err) {
             console.error("SPA Catch-all Error:", err);
-            res.status(404).send(`FRONTEND ERROR (v4.0.8): File not found at ${indexPath}. Current __dirname is ${__dirname}`);
+            res.status(404).send(`FRONTEND ERROR (v4.0.9): File not found at ${indexPath}. Current __dirname is ${__dirname}`);
         }
     });
 });

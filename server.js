@@ -83,22 +83,35 @@ app.delete('/api/escalations/:id', async (req, res) => {
 
 // Delete an escalation (already above)
 
-// Debug directory structure on Render
-app.get('/debug-dist', (req, res) => {
+// Comprehensive Debug Route
+app.get('/debug-full', (req, res) => {
     const fs = require('fs');
-    const distPath = path.join(__dirname, 'dist');
-    const exists = fs.existsSync(distPath);
-    let contents = [];
-    if (exists) {
-        contents = fs.readdirSync(distPath);
+
+    function getAllFiles(dirPath, arrayOfFiles) {
+        let files = fs.readdirSync(dirPath);
+        arrayOfFiles = arrayOfFiles || [];
+        files.forEach(function (file) {
+            if (fs.statSync(dirPath + "/" + file).isDirectory()) {
+                if (file !== 'node_modules' && file !== '.git') {
+                    arrayOfFiles.push({ name: file, type: 'dir', path: dirPath + "/" + file });
+                    arrayOfFiles = getAllFiles(dirPath + "/" + file, arrayOfFiles);
+                }
+            } else {
+                arrayOfFiles.push({ name: file, type: 'file', path: dirPath + "/" + file });
+            }
+        });
+        return arrayOfFiles;
     }
-    res.json({
-        cwd: process.cwd(),
-        dirname: __dirname,
-        distPath,
-        exists,
-        contents
-    });
+
+    try {
+        const structure = getAllFiles(__dirname);
+        res.json({
+            root: __dirname,
+            structure
+        });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
 });
 
 // Static files (Serve after API routes)
@@ -111,7 +124,7 @@ app.use((req, res, next) => {
     res.sendFile(indexPath, (err) => {
         if (err) {
             console.error("SPA Catch-all Error:", err);
-            res.status(404).send(`Frontend not found at ${indexPath}. Please check build logs. (v4.0.7)`);
+            res.status(404).send(`FRONTEND ERROR (v4.0.8): File not found at ${indexPath}. Current __dirname is ${__dirname}`);
         }
     });
 });

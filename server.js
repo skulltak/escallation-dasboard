@@ -19,9 +19,17 @@ app.use((req, res, next) => {
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
+// Log Capture Shim
+const logs = [];
+const originalLog = console.log;
+const originalError = console.error;
+console.log = (...args) => { logs.push(`[LOG] ${args.join(' ')}`); if (logs.length > 100) logs.shift(); originalLog(...args); };
+console.error = (...args) => { logs.push(`[ERR] ${args.join(' ')}`); if (logs.length > 100) logs.shift(); originalError(...args); };
+
 // API Routes
 app.get('/health', (req, res) => res.send('OK'));
-app.get('/api/info', (req, res) => res.json({ version: 'v4.1.2', limit: '50mb', time: new Date().toISOString() }));
+app.get('/api/info', (req, res) => res.json({ version: 'v4.1.3', limit: '50mb', db_status: mongoose.connection.readyState, time: new Date().toISOString() }));
+app.get('/api/logs', (req, res) => res.send(logs.join('\n')));
 
 app.get('/api/escalations', async (req, res) => {
     try {
@@ -105,8 +113,8 @@ app.use((req, res, next) => {
     const indexPath = path.join(__dirname, 'dist', 'index.html');
     res.sendFile(indexPath, (err) => {
         if (err) {
-            console.error("SPA Error (v4.1.2):", err);
-            res.status(404).send(`[Escalation Dashboard v4.1.2] Deployment Sync Error: Frontend files missing at ${indexPath}. Please ensure the build command succeeded.`);
+            console.error("SPA Error (v4.1.3):", err);
+            res.status(404).send(`[Escalation Dashboard v4.1.3] Deployment Sync Error: Frontend files missing at ${indexPath}. Please ensure the build command succeeded.`);
         }
     });
 });
@@ -119,12 +127,12 @@ const startServer = async () => {
         console.log('✅ MongoDB Connected');
 
         app.listen(PORT, '0.0.0.0', () => {
-            console.log(`🚀 Escalation Dashboard v4.1.2 - 3D PRO Live on port ${PORT}`);
+            console.log(`🚀 Escalation Dashboard v4.1.3 - 3D PRO Live on port ${PORT}`);
         });
     } catch (err) {
         console.error('❌ MongoDB Connection Error:', err.message);
         app.listen(PORT, '0.0.0.0', () => {
-            console.log(`🚀 Server running on port ${PORT} (v4.1.2 - DB Offline)`);
+            console.log(`🚀 Server running on port ${PORT} (v4.1.3 - DB Offline)`);
         });
     }
 };

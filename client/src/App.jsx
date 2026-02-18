@@ -621,7 +621,7 @@ const App = () => {
         <form className="login-card" onSubmit={handleLogin}>
           <img src={logo} className="login-logo" alt="VE CARE Logo" />
           <h1 className="login-title">Escalation Dashboard</h1>
-          <p className="login-subtitle">Secure Access Management</p>
+          <p className="login-subtitle">Secure Access Management <span style={{ fontSize: '10px', opacity: 0.5 }}>(v4.0 - 3D PRO)</span></p>
           <div className="flex flex-col gap-1">
             <input name="loginUser" type="text" className="login-input" placeholder="Username / ID" required />
             <input name="loginPass" type="password" className="login-input" placeholder="Password" required />

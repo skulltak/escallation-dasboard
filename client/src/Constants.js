@@ -20,7 +20,9 @@ export const HEADER_MAP = {
     // Status
     "status": "status", "current status": "status", "case status": "status", "resolution": "status",
     // Remark
-    "remark": "remark", "remarks": "remark", "technician remarks": "remark", "note": "remark", "comments": "remark", "final remark": "remark"
+    "remark": "remark", "remarks": "remark", "technician remarks": "remark", "note": "remark", "comments": "remark", "final remark": "remark",
+    // Service Type
+    "service type": "serviceType", "type of service": "serviceType", "service": "serviceType", "service_type": "serviceType"
 };
 
 export const API_URL = '/api/escalations';

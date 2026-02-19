@@ -5,6 +5,7 @@ const escalationSchema = new mongoose.Schema({
     id: { type: String, required: true },
     branch: { type: String, required: true },
     brand: { type: String },
+    serviceType: { type: String },
     reason: { type: String },
     city: { type: String },
     aging: { type: Number, default: 0 },

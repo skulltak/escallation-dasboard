@@ -1,4 +1,4 @@
-// Build v4.5.0 - Cancelled Status and Stat Reordering
+// Build v4.6.0 - Service Type and Table Rearrangement
 import React, { useState, useEffect, useMemo, useDeferredValue } from 'react';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
@@ -160,7 +160,8 @@ const App = () => {
     branch: '',
     status: '',
     aging: '',
-    brand: ''
+    brand: '',
+    serviceType: ''
   });
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
@@ -171,6 +172,7 @@ const App = () => {
     id: '',
     branch: '',
     brand: '',
+    serviceType: '',
     reason: '',
     city: '',
     aging: 0,
@@ -273,8 +275,9 @@ const App = () => {
       else if (deferredFilters.aging === "11+") matchesAging = d.aging > 10;
 
       const matchesBrand = deferredFilters.brand === "" || String(d.brand || "").toLowerCase() === String(deferredFilters.brand).toLowerCase();
+      const matchesServiceType = deferredFilters.serviceType === "" || String(d.serviceType || "").toLowerCase() === String(deferredFilters.serviceType).toLowerCase();
 
-      return matchesSearch && matchesStatus && matchesBranch && matchesDate && matchesAging && matchesBrand;
+      return matchesSearch && matchesStatus && matchesBranch && matchesDate && matchesAging && matchesBrand && matchesServiceType;
     });
   }, [data, deferredFilters, user]);
 
@@ -335,6 +338,7 @@ const App = () => {
       id: '',
       branch: user?.role !== 'ADMIN' ? user.role : '',
       brand: '',
+      serviceType: '',
       reason: '',
       city: '',
       aging: 0,
@@ -887,9 +891,10 @@ const App = () => {
                         <option>Closed</option>
                         <option>Cancelled</option>
                       </select>
-                      <select className="btn-sm" value={filters.brand} onChange={(e) => setFilters({ ...filters, brand: e.target.value })}>
-                        <option value="">All Brands</option>
-                        {BRANDS.map(b => <option key={b}>{b}</option>)}
+                      <select className="btn-sm" value={filters.serviceType} onChange={(e) => setFilters({ ...filters, serviceType: e.target.value })}>
+                        <option value="">All Services</option>
+                        <option>Field Service</option>
+                        <option>Installation & Demo</option>
                       </select>
                       <label className="btn-sm flex items-center gap-2">
                         <FileUp size={16} /> Import
@@ -906,11 +911,11 @@ const App = () => {
                       <thead>
                         <tr>
                           <th>Date</th>
-                          <th>ID</th>
-                          <th>Branch</th>
-                          <th>Brand</th>
-                          <th>Reason</th>
                           <th>Aging</th>
+                          <th>Brand</th>
+                          <th>ID</th>
+                          <th>Service Type</th>
+                          <th>Reason</th>
                           <th>Status</th>
                           <th>Actions</th>
                         </tr>
@@ -919,12 +924,20 @@ const App = () => {
                         {filteredData.map(row => (
                           <tr key={row._id}>
                             <td>{row.date}</td>
-                            <td>{row.id}</td>
-                            <td>{row.branch}</td>
+                            <td>
+                              <span className={`badge ${row.aging > 10 ? 'badge-danger' : row.aging > 5 ? 'badge-warning' : 'badge-success'}`}>
+                                {row.aging} Days
+                              </span>
+                            </td>
                             <td>{row.brand}</td>
-                            <td>{row.reason}</td>
-                            <td>{row.aging} Days</td>
-                            <td><span className={`badge badge-${row.status.toLowerCase().replace(' ', '-')}`}>{row.status}</span></td>
+                            <td className="font-medium text-secondary">{row.id}</td>
+                            <td>{row.serviceType}</td>
+                            <td className="text-secondary" style={{ maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.reason}</td>
+                            <td>
+                              <span className={`status-pill ${String(row.status || "").toLowerCase() === 'closed' ? 'closed' : String(row.status || "").toLowerCase() === 'cancelled' ? 'cancelled' : 'open'}`}>
+                                {row.status}
+                              </span>
+                            </td>
                             <td>
                               <div className="flex gap-2">
                                 <button onClick={() => openEditModal(row)} className="btn-sm" style={{ padding: '0.25rem' }}><Edit2 size={14} /></button>
@@ -988,79 +1001,94 @@ const App = () => {
             </div>
           )}
         </div>
-      </main>
+      </main >
 
       {/* Modal */}
-      {modalOpen && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <div className="modal-header">
-              <h3>{editingId ? 'Edit Case' : 'New Case'}</h3>
-              <X className="cursor-pointer" onClick={closeCaseModal} />
+      {
+        modalOpen && (
+          <div className="modal-overlay">
+            <div className="modal">
+              <div className="modal-header">
+                <h3>{editingId ? 'Edit Case' : 'New Case'}</h3>
+                <X className="cursor-pointer" onClick={closeCaseModal} />
+              </div>
+              <form onSubmit={handleSave} style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem', overflowY: 'auto' }}>
+                <div className="form-group">
+                  <label>Reference ID</label>
+                  <input required className="form-control" value={formData.id} onChange={(e) => setFormData({ ...formData, id: e.target.value })} />
+                </div>
+                <div className="form-group">
+                  <label>Date Logged</label>
+                  <input type="date" required className="form-control" value={formData.date} onChange={(e) => setFormData({ ...formData, date: e.target.value })} />
+                </div>
+                <div className="form-group">
+                  <label>Branch</label>
+                  <select
+                    className="form-control"
+                    required
+                    disabled={user.role !== 'ADMIN'}
+                    value={formData.branch}
+                    onChange={(e) => setFormData({ ...formData, branch: e.target.value })}
+                  >
+                    <option value="">Select Branch</option>
+                    {BRANCHES.map(b => <option key={b}>{b}</option>)}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Brand</label>
+                  <select
+                    className="form-control"
+                    required
+                    value={formData.brand}
+                    onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+                  >
+                    <option value="">Select Brand</option>
+                    {BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Service Type</label>
+                  <select
+                    className="form-control"
+                    required
+                    value={formData.serviceType}
+                    onChange={(e) => setFormData({ ...formData, serviceType: e.target.value })}
+                  >
+                    <option value="">Select Service Type</option>
+                    <option>Field Service</option>
+                    <option>Installation & Demo</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Status</label>
+                  <select className="form-control" value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })}>
+                    <option>Open</option>
+                    <option>Closed</option>
+                    <option>Cancelled</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Aging Days</label>
+                  <input type="number" className="form-control" value={formData.aging} onChange={(e) => setFormData({ ...formData, aging: parseInt(e.target.value) || 0 })} />
+                </div>
+                <div className="form-group">
+                  <label>Reason</label>
+                  <input className="form-control" value={formData.reason} onChange={(e) => setFormData({ ...formData, reason: e.target.value })} />
+                </div>
+                <div className="form-group">
+                  <label>Remarks</label>
+                  <textarea className="form-control" rows="3" value={formData.remark} onChange={(e) => setFormData({ ...formData, remark: e.target.value })} />
+                </div>
+                <div className="flex gap-2" style={{ marginTop: 'auto', paddingTop: '1rem' }}>
+                  <button type="button" className="btn-sm" style={{ flex: 1 }} onClick={closeCaseModal}>Cancel</button>
+                  <button type="submit" className="btn-primary" style={{ flex: 2 }}>{editingId ? 'Update' : 'Save'} Record</button>
+                </div>
+              </form>
             </div>
-            <form onSubmit={handleSave} style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem', overflowY: 'auto' }}>
-              <div className="form-group">
-                <label>Reference ID</label>
-                <input required className="form-control" value={formData.id} onChange={(e) => setFormData({ ...formData, id: e.target.value })} />
-              </div>
-              <div className="form-group">
-                <label>Date Logged</label>
-                <input type="date" required className="form-control" value={formData.date} onChange={(e) => setFormData({ ...formData, date: e.target.value })} />
-              </div>
-              <div className="form-group">
-                <label>Branch</label>
-                <select
-                  className="form-control"
-                  required
-                  disabled={user.role !== 'ADMIN'}
-                  value={formData.branch}
-                  onChange={(e) => setFormData({ ...formData, branch: e.target.value })}
-                >
-                  <option value="">Select Branch</option>
-                  {BRANCHES.map(b => <option key={b}>{b}</option>)}
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Brand</label>
-                <select
-                  className="form-control"
-                  required
-                  value={formData.brand}
-                  onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
-                >
-                  <option value="">Select Brand</option>
-                  {BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Status</label>
-                <select className="form-control" value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })}>
-                  <option>Open</option>
-                  <option>Closed</option>
-                  <option>Cancelled</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Aging Days</label>
-                <input type="number" className="form-control" value={formData.aging} onChange={(e) => setFormData({ ...formData, aging: parseInt(e.target.value) || 0 })} />
-              </div>
-              <div className="form-group">
-                <label>Reason</label>
-                <input className="form-control" value={formData.reason} onChange={(e) => setFormData({ ...formData, reason: e.target.value })} />
-              </div>
-              <div className="form-group">
-                <label>Remarks</label>
-                <textarea className="form-control" rows="3" value={formData.remark} onChange={(e) => setFormData({ ...formData, remark: e.target.value })} />
-              </div>
-              <div className="flex gap-2" style={{ marginTop: 'auto', paddingTop: '1rem' }}>
-                <button type="button" className="btn-sm" style={{ flex: 1 }} onClick={closeCaseModal}>Cancel</button>
-                <button type="submit" className="btn-primary" style={{ flex: 2 }}>{editingId ? 'Update' : 'Save'} Record</button>
-              </div>
-            </form>
           </div>
-        </div>
-      )}
-    </div>
+        )
+      }
+    </div >
   );
 };
 

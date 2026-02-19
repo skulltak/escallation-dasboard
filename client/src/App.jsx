@@ -1,4 +1,4 @@
-// Build v4.6.0 - Service Type and Table Rearrangement
+// Build v4.7.0 - Searchable Brand & Aging Filters
 import React, { useState, useEffect, useMemo, useDeferredValue } from 'react';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
@@ -269,12 +269,8 @@ const App = () => {
         return false;
       })();
 
-      let matchesAging = true;
-      if (deferredFilters.aging === "0-5") matchesAging = d.aging <= 5;
-      else if (deferredFilters.aging === "6-10") matchesAging = d.aging >= 6 && d.aging <= 10;
-      else if (deferredFilters.aging === "11+") matchesAging = d.aging > 10;
-
-      const matchesBrand = deferredFilters.brand === "" || String(d.brand || "").toLowerCase() === String(deferredFilters.brand).toLowerCase();
+      const matchesAging = deferredFilters.aging === "" || String(d.aging || 0).includes(deferredFilters.aging);
+      const matchesBrand = deferredFilters.brand === "" || String(d.brand || "").toLowerCase().includes(String(deferredFilters.brand).toLowerCase());
       const matchesServiceType = deferredFilters.serviceType === "" || String(d.serviceType || "").toLowerCase() === String(deferredFilters.serviceType).toLowerCase();
 
       return matchesSearch && matchesStatus && matchesBranch && matchesDate && matchesAging && matchesBrand && matchesServiceType;
@@ -896,6 +892,25 @@ const App = () => {
                         <option>Field Service</option>
                         <option>Installation & Demo</option>
                       </select>
+                      <input
+                        list="brand-list"
+                        className="btn-sm"
+                        placeholder="Search Brand..."
+                        style={{ width: '130px' }}
+                        value={filters.brand}
+                        onChange={(e) => setFilters({ ...filters, brand: e.target.value })}
+                      />
+                      <datalist id="brand-list">
+                        {BRANDS.map(b => <option key={b} value={b} />)}
+                      </datalist>
+                      <input
+                        type="text"
+                        className="btn-sm"
+                        placeholder="Search Aging..."
+                        style={{ width: '120px' }}
+                        value={filters.aging}
+                        onChange={(e) => setFilters({ ...filters, aging: e.target.value })}
+                      />
                       <label className="btn-sm flex items-center gap-2">
                         <FileUp size={16} /> Import
                         <input type="file" className="hidden" accept=".csv, .xlsx, .xls" onChange={handleImport} />

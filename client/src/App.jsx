@@ -1,4 +1,4 @@
-// Build v4.7.1 - Exact Aging Match Fix
+// Build v4.7.2 - Stat Card Refinement
 import React, { useState, useEffect, useMemo, useDeferredValue } from 'react';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
@@ -767,8 +767,8 @@ const App = () => {
                   </div>
                   <div className="stat-card">
                     <div className="stat-info">
-                      <h4>Open / New</h4>
-                      <div className="value">{filteredData.filter(d => String(d.status || "").toLowerCase() === 'open' && d.aging <= 5).length}</div>
+                      <h4>Total Open</h4>
+                      <div className="value">{filteredData.filter(d => String(d.status || "").toLowerCase() === 'open').length}</div>
                     </div>
                     <div className="icon-box bg-red-100"><AlertTriangle size={24} /></div>
                   </div>

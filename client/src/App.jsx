@@ -1,4 +1,4 @@
-// Build v4.4.0 - Collapsible Sidebar and Layout Optimization
+// Build v4.5.0 - Cancelled Status and Stat Reordering
 import React, { useState, useEffect, useMemo, useDeferredValue } from 'react';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
@@ -18,7 +18,8 @@ import {
   X,
   Edit2,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  XCircle
 } from 'lucide-react';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import {
@@ -621,18 +622,19 @@ const App = () => {
   }, [filteredData]);
 
   const doughnutData = useMemo(() => {
-    const stats = { open: 0, aging: 0, closed: 0 };
+    const stats = { open: 0, aging: 0, closed: 0, cancelled: 0 };
     filteredData.forEach(d => {
       const s = String(d.status || "").toLowerCase();
       if (s === 'closed') stats.closed++;
+      else if (s === 'cancelled') stats.cancelled++;
       else if (d.aging > 5) stats.aging++;
       else stats.open++;
     });
     return {
-      labels: ['Open/New', 'Aging (>5 Days)', 'Closed'],
+      labels: ['Open/New', 'Aging (>5 Days)', 'Closed', 'Cancelled'],
       datasets: [{
-        data: [stats.open, stats.aging, stats.closed],
-        backgroundColor: ['#fef08a', '#b91c1c', '#10b981'],
+        data: [stats.open, stats.aging, stats.closed, stats.cancelled],
+        backgroundColor: ['#fef08a', '#b91c1c', '#10b981', '#94a3b8'],
         borderWidth: 0,
         hoverOffset: 4
       }]
@@ -641,7 +643,7 @@ const App = () => {
 
   const SkeletonStats = () => (
     <div className="stats-grid">
-      {[...Array(4)].map((_, i) => (
+      {[...Array(5)].map((_, i) => (
         <div key={i} className="stat-card skeleton" style={{ height: '110px' }}></div>
       ))}
     </div>
@@ -670,7 +672,7 @@ const App = () => {
         <form className="login-card" onSubmit={handleLogin}>
           <img src={logo} className="login-logo" alt="VE CARE Logo" />
           <h1 className="login-title">Escalation Dashboard</h1>
-          <p className="login-subtitle">Secure Access Management <span style={{ fontSize: '10px', opacity: 0.5 }}>(v4.4.0 - 3D PRO)</span></p>
+          <p className="login-subtitle">Secure Access Management <span style={{ fontSize: '10px', opacity: 0.5 }}>(v4.5.0 - 3D PRO)</span></p>
           <div className="flex flex-col gap-1">
             <input name="loginUser" type="text" className="login-input" placeholder="Username / ID" required />
             <input name="loginPass" type="password" className="login-input" placeholder="Password" required />
@@ -728,7 +730,7 @@ const App = () => {
       <main className={`main-content ${loading ? 'opacity-50' : ''}`}>
         <header className="top-bar">
           <div className="flex flex-col">
-            <h2 className="page-title">{view === 'dashboard' ? 'Overview' : 'Reports'} <span style={{ fontSize: '12px', opacity: 0.5, fontWeight: 'normal' }}>(v4.4.0)</span></h2>
+            <h2 className="page-title">{view === 'dashboard' ? 'Overview' : 'Reports'} <span style={{ fontSize: '12px', opacity: 0.5, fontWeight: 'normal' }}>(v4.5.0)</span></h2>
             <div className="text-xs flex items-center gap-1" style={{ opacity: 0.7 }}>
               Status: <span style={{ color: dbStatus === 'Connected' ? '#10b981' : '#ef4444', fontWeight: 'bold' }}>
                 {dbStatus === 'Connected' ? '🟢 Connected' : '🔴 Database Offline'}
@@ -770,21 +772,28 @@ const App = () => {
                     </div>
                     <div className="icon-box bg-red-100"><AlertTriangle size={24} /></div>
                   </div>
-                  <div className="stat-card" style={{ border: '1px solid var(--warning)' }}>
-                    <div className="stat-info">
-                      <h4 style={{ color: 'var(--warning)' }}>Aging ({'>'} 5 Days)</h4>
-                      <div className="value" style={{ WebkitTextFillColor: 'var(--warning)' }}>
-                        {filteredData.filter(d => String(d.status || "").toLowerCase() !== 'closed' && d.aging > 5).length}
-                      </div>
-                    </div>
-                    <div className="icon-box bg-yellow-100"><AlertTriangle size={24} /></div>
-                  </div>
                   <div className="stat-card">
                     <div className="stat-info">
                       <h4>Closed</h4>
                       <div className="value">{filteredData.filter(d => String(d.status || "").toLowerCase() === 'closed').length}</div>
                     </div>
                     <div className="icon-box bg-green-100"><CheckCircle2 size={24} /></div>
+                  </div>
+                  <div className="stat-card">
+                    <div className="stat-info">
+                      <h4>Cancelled</h4>
+                      <div className="value">{filteredData.filter(d => String(d.status || "").toLowerCase() === 'cancelled').length}</div>
+                    </div>
+                    <div className="icon-box bg-gray-100" style={{ color: '#64748b' }}><XCircle size={24} /></div>
+                  </div>
+                  <div className="stat-card" style={{ border: '1px solid var(--warning)' }}>
+                    <div className="stat-info">
+                      <h4 style={{ color: 'var(--warning)' }}>Aging ({'>'} 5 Days)</h4>
+                      <div className="value" style={{ WebkitTextFillColor: 'var(--warning)' }}>
+                        {filteredData.filter(d => String(d.status || "").toLowerCase() !== 'closed' && String(d.status || "").toLowerCase() !== 'cancelled' && d.aging > 5).length}
+                      </div>
+                    </div>
+                    <div className="icon-box bg-yellow-100"><AlertTriangle size={24} /></div>
                   </div>
                 </div>
               )}
@@ -876,6 +885,7 @@ const App = () => {
                         <option value="">All Status</option>
                         <option>Open</option>
                         <option>Closed</option>
+                        <option>Cancelled</option>
                       </select>
                       <select className="btn-sm" value={filters.brand} onChange={(e) => setFilters({ ...filters, brand: e.target.value })}>
                         <option value="">All Brands</option>
@@ -1027,6 +1037,7 @@ const App = () => {
                 <select className="form-control" value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })}>
                   <option>Open</option>
                   <option>Closed</option>
+                  <option>Cancelled</option>
                 </select>
               </div>
               <div className="form-group">

@@ -1,4 +1,4 @@
-// Build v4.8.1 - Red Glow Deployment Fix
+// Build v4.9.0 - Brand Escalation UI Refinement
 import React, { useState, useEffect, useMemo, useDeferredValue } from 'react';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
@@ -636,7 +636,7 @@ const App = () => {
       datasets: [{
         label: 'Cases by Brand',
         data: BRANDS.map(brand => filteredData.filter(d => String(d.brand || "").toLowerCase() === brand.toLowerCase()).length),
-        backgroundColor: ['#4285F4', '#ea4335', '#fbbc05', '#34a853', '#6366f1', '#a855f7', '#ec4899'],
+        backgroundColor: '#6366f1',
         borderRadius: 4
       }]
     };
@@ -693,7 +693,7 @@ const App = () => {
         <form className="login-card" onSubmit={handleLogin}>
           <img src={logo} className="login-logo" alt="VE CARE Logo" />
           <h1 className="login-title">Escalation Dashboard</h1>
-          <p className="login-subtitle">Secure Access Management <span style={{ fontSize: '10px', opacity: 0.5 }}>(v4.8.1 - 3D PRO)</span></p>
+          <p className="login-subtitle">Secure Access Management <span style={{ fontSize: '10px', opacity: 0.5 }}>(v4.9.0 - 3D PRO)</span></p>
           <div className="flex flex-col gap-1">
             <input name="loginUser" type="text" className="login-input" placeholder="Username / ID" required />
             <input name="loginPass" type="password" className="login-input" placeholder="Password" required />
@@ -866,7 +866,7 @@ const App = () => {
                   </div>
                 </div>
                 <div className="chart-card">
-                  <h3>Brand Performance</h3>
+                  <h3>Brand Escalation</h3>
                   <div className="chart-container">
                     <Bar data={brandBarData} options={{
                       responsive: true,

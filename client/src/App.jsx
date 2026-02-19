@@ -281,9 +281,11 @@ const App = () => {
       const uUpper = u.toUpperCase();
       let branchRef = BRANCHES.find(b => b.toUpperCase() === uUpper);
 
-      // Alias HYD to Hyderabad
+      // Alias HYD to Hyderabad, MP to Madhya Pradesh
       if (uUpper === "HYD" || uUpper === "HYDERABAD") {
         branchRef = "Hyderabad";
+      } else if (uUpper === "MP") {
+        branchRef = "Madhya Pradesh";
       }
 
       if (uUpper === "ADMIN" || branchRef) {
@@ -437,9 +439,12 @@ const App = () => {
           // Normalize branch name if it matches a known branch in any case
           let canonicalBranch = BRANCHES.find(b => b.toLowerCase() === String(entry.branch).toLowerCase());
 
-          // Alias HYD to Hyderabad during import normalization
-          if (String(entry.branch).toUpperCase() === "HYD" || String(entry.branch).toUpperCase() === "HYDERABAD") {
+          // Alias HYD to Hyderabad, MP to Madhya Pradesh during import normalization
+          const branchUpper = String(entry.branch).toUpperCase();
+          if (branchUpper === "HYD" || branchUpper === "HYDERABAD") {
             canonicalBranch = "Hyderabad";
+          } else if (branchUpper === "MP") {
+            canonicalBranch = "Madhya Pradesh";
           }
 
           if (canonicalBranch) entry.branch = canonicalBranch;

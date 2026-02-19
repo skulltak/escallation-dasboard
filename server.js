@@ -28,7 +28,7 @@ console.error = (...args) => { logs.push(`[ERR] ${args.join(' ')}`); if (logs.le
 
 // API Routes
 app.get('/health', (req, res) => res.send('OK'));
-app.get('/api/info', (req, res) => res.json({ version: 'v4.1.3', limit: '50mb', db_status: mongoose.connection.readyState, time: new Date().toISOString() }));
+app.get('/api/info', (req, res) => res.json({ version: 'v4.1.6', limit: '50mb', db_status: mongoose.connection.readyState, time: new Date().toISOString() }));
 app.get('/api/logs', (req, res) => res.send(logs.join('\n')));
 
 app.get('/api/escalations', async (req, res) => {
@@ -111,10 +111,11 @@ app.use(express.static(path.join(__dirname, 'dist')));
 app.use((req, res, next) => {
     if (req.url.startsWith('/api')) return next();
     const indexPath = path.join(__dirname, 'dist', 'index.html');
+    const exists = require('fs').existsSync(indexPath);
     res.sendFile(indexPath, (err) => {
         if (err) {
-            console.error("SPA Error (v4.1.3):", err);
-            res.status(404).send(`[Escalation Dashboard v4.1.3] Deployment Sync Error: Frontend files missing at ${indexPath}. Please ensure the build command succeeded.`);
+            console.error(`SPA Error (v4.1.6): File exists? ${exists}. Path: ${indexPath}`, err);
+            res.status(404).send(`[Escalation Dashboard v4.1.6] Deployment Sync Error: Frontend files missing at ${indexPath}. Build check: ${exists}. Please ensure the build command succeeded.`);
         }
     });
 });
@@ -135,12 +136,12 @@ const startServer = async () => {
         console.log('✅ MongoDB Connected');
 
         app.listen(PORT, '0.0.0.0', () => {
-            console.log(`🚀 Escalation Dashboard v4.1.3 - 3D PRO Live on port ${PORT}`);
+            console.log(`🚀 Escalation Dashboard v4.1.6 - 3D PRO Live on port ${PORT}`);
         });
     } catch (err) {
         console.error('❌ MongoDB Connection Error:', err.message);
         app.listen(PORT, '0.0.0.0', () => {
-            console.log(`🚀 Server running on port ${PORT} (v4.1.3 - DB Offline)`);
+            console.log(`🚀 Server running on port ${PORT} (v4.1.6 - DB Offline)`);
         });
     }
 };

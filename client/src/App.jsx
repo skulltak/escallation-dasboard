@@ -1,4 +1,4 @@
-// Build v4.2.0 - Aging Bar Graph for Branch Dashboards
+// Build v4.3.0 - Brand Analytics and Filtering
 import React, { useState, useEffect, useMemo, useDeferredValue } from 'react';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
@@ -29,7 +29,7 @@ import {
   Legend,
   ArcElement,
 } from 'chart.js';
-import { BRANCHES, HEADER_MAP, API_URL } from './Constants';
+import { BRANCHES, BRANDS, HEADER_MAP, API_URL } from './Constants';
 import logo from './assets/logo.png';
 
 ChartJS.register(
@@ -156,7 +156,8 @@ const App = () => {
     date: '',
     branch: '',
     status: '',
-    aging: ''
+    aging: '',
+    brand: ''
   });
 
   const deferredFilters = useDeferredValue(filters);
@@ -267,7 +268,9 @@ const App = () => {
       else if (deferredFilters.aging === "6-10") matchesAging = d.aging >= 6 && d.aging <= 10;
       else if (deferredFilters.aging === "11+") matchesAging = d.aging > 10;
 
-      return matchesSearch && matchesStatus && matchesBranch && matchesDate && matchesAging;
+      const matchesBrand = deferredFilters.brand === "" || String(d.brand || "").toLowerCase() === String(deferredFilters.brand).toLowerCase();
+
+      return matchesSearch && matchesStatus && matchesBranch && matchesDate && matchesAging && matchesBrand;
     });
   }, [data, deferredFilters, user]);
 
@@ -602,6 +605,18 @@ const App = () => {
     };
   }, [filteredData]);
 
+  const brandBarData = useMemo(() => {
+    return {
+      labels: BRANDS,
+      datasets: [{
+        label: 'Cases by Brand',
+        data: BRANDS.map(brand => filteredData.filter(d => String(d.brand || "").toLowerCase() === brand.toLowerCase()).length),
+        backgroundColor: '#10b981',
+        borderRadius: 4
+      }]
+    };
+  }, [filteredData]);
+
   const doughnutData = useMemo(() => {
     const stats = { open: 0, aging: 0, closed: 0 };
     filteredData.forEach(d => {
@@ -801,6 +816,22 @@ const App = () => {
                     }} />
                   </div>
                 </div>
+                <div className="chart-card">
+                  <h3>Brand Performance</h3>
+                  <div className="chart-container">
+                    <Bar data={brandBarData} options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: {
+                        legend: { display: false }
+                      },
+                      scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+                        x: { grid: { display: false }, ticks: { font: { size: 10 } } }
+                      }
+                    }} />
+                  </div>
+                </div>
               </div>
 
               {loading || importing ? <SkeletonTable /> : (
@@ -827,6 +858,10 @@ const App = () => {
                         <option value="">All Status</option>
                         <option>Open</option>
                         <option>Closed</option>
+                      </select>
+                      <select className="btn-sm" value={filters.brand} onChange={(e) => setFilters({ ...filters, brand: e.target.value })}>
+                        <option value="">All Brands</option>
+                        {BRANDS.map(b => <option key={b}>{b}</option>)}
                       </select>
                       <label className="btn-sm flex items-center gap-2">
                         <FileUp size={16} /> Import

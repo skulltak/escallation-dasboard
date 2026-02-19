@@ -4,7 +4,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "build": "mkdir -p dist && npm install && cd client && npm install --legacy-peer-deps && npm run build && cd .. && ls -R dist",
+    "build": "npm install --prefix client --legacy-peer-deps && npm run build --prefix client",
     "dev": "nodemon server.js"
   },
   "keywords": [],

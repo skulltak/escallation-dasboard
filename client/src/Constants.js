@@ -1,5 +1,7 @@
 export const BRANCHES = ["Andhra Pradesh", "Bangalore", "Chennai", "Hyderabad", "Madhya Pradesh", "Mum_Thn", "Rajasthan", "RO TEL", "RO KAR", "RO TN", "ROM", "UP EAST", "Uttar Pradesh", "West Bengal", "UP WEST"];
 
+export const BRANDS = ["VW", "SPPL", "VIDEOCON", "AMAZON", "NIPPO", "LEDVANCE", "AERO NERO"];
+
 export const HEADER_MAP = {
     // Date
     "date": "date", "date logged": "date", "logged date": "date", "entry date": "date", "date of entry": "date", "case date": "date", "created date": "date",

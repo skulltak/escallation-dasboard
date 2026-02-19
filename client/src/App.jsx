@@ -609,7 +609,7 @@ const App = () => {
       labels: ['Open/New', 'Aging (>5 Days)', 'Closed'],
       datasets: [{
         data: [stats.open, stats.aging, stats.closed],
-        backgroundColor: ['#fef08a', '#ef4444', '#10b981'],
+        backgroundColor: ['#fef08a', '#b91c1c', '#10b981'],
         borderWidth: 0,
         hoverOffset: 4
       }]

@@ -1,6 +1,6 @@
 {
   "name": "esacation-dashboard",
-  "version": "4.8.1",
+  "version": "4.9.1",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

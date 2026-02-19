@@ -1,4 +1,4 @@
-// Build v4.3.0 - Brand Analytics and Filtering
+// Build v4.3.1 - Refined Chart Visuals and Axis Labels
 import React, { useState, useEffect, useMemo, useDeferredValue } from 'react';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
@@ -611,7 +611,7 @@ const App = () => {
       datasets: [{
         label: 'Cases by Brand',
         data: BRANDS.map(brand => filteredData.filter(d => String(d.brand || "").toLowerCase() === brand.toLowerCase()).length),
-        backgroundColor: '#10b981',
+        backgroundColor: ['#4285F4', '#ea4335', '#fbbc05', '#34a853', '#6366f1', '#a855f7', '#ec4899'],
         borderRadius: 4
       }]
     };
@@ -667,7 +667,7 @@ const App = () => {
         <form className="login-card" onSubmit={handleLogin}>
           <img src={logo} className="login-logo" alt="VE CARE Logo" />
           <h1 className="login-title">Escalation Dashboard</h1>
-          <p className="login-subtitle">Secure Access Management <span style={{ fontSize: '10px', opacity: 0.5 }}>(v4.3.0 - 3D PRO)</span></p>
+          <p className="login-subtitle">Secure Access Management <span style={{ fontSize: '10px', opacity: 0.5 }}>(v4.3.1 - 3D PRO)</span></p>
           <div className="flex flex-col gap-1">
             <input name="loginUser" type="text" className="login-input" placeholder="Username / ID" required />
             <input name="loginPass" type="password" className="login-input" placeholder="Password" required />
@@ -718,7 +718,7 @@ const App = () => {
       <main className={`main-content ${loading ? 'opacity-50' : ''}`}>
         <header className="top-bar">
           <div className="flex flex-col">
-            <h2 className="page-title">{view === 'dashboard' ? 'Overview' : 'Reports'} <span style={{ fontSize: '12px', opacity: 0.5, fontWeight: 'normal' }}>(v4.3.0)</span></h2>
+            <h2 className="page-title">{view === 'dashboard' ? 'Overview' : 'Reports'} <span style={{ fontSize: '12px', opacity: 0.5, fontWeight: 'normal' }}>(v4.3.1)</span></h2>
             <div className="text-xs flex items-center gap-1" style={{ opacity: 0.7 }}>
               Status: <span style={{ color: dbStatus === 'Connected' ? '#10b981' : '#ef4444', fontWeight: 'bold' }}>
                 {dbStatus === 'Connected' ? '🟢 Connected' : '🔴 Database Offline'}
@@ -811,7 +811,15 @@ const App = () => {
                       },
                       scales: {
                         y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' }, title: user?.role !== 'ADMIN' ? { display: true, text: 'Days' } : undefined },
-                        x: { grid: { display: false }, ticks: user?.role !== 'ADMIN' ? { maxRotation: 45, minRotation: 0, font: { size: 10 } } : undefined }
+                        x: {
+                          grid: { display: false },
+                          ticks: {
+                            autoSkip: false,
+                            maxRotation: 45,
+                            minRotation: 0,
+                            font: { size: 10 }
+                          }
+                        }
                       }
                     }} />
                   </div>

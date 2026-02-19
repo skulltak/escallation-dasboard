@@ -28,7 +28,7 @@ console.error = (...args) => { logs.push(`[ERR] ${args.join(' ')}`); if (logs.le
 
 // API Routes
 app.get('/health', (req, res) => res.send('OK'));
-app.get('/api/info', (req, res) => res.json({ version: 'v4.3.0', limit: '50mb', db_status: mongoose.connection.readyState, time: new Date().toISOString() }));
+app.get('/api/info', (req, res) => res.json({ version: 'v4.3.1', limit: '50mb', db_status: mongoose.connection.readyState, time: new Date().toISOString() }));
 app.get('/api/logs', (req, res) => res.send(logs.join('\n')));
 
 app.get('/api/escalations', async (req, res) => {
@@ -114,8 +114,8 @@ app.use((req, res, next) => {
     const exists = require('fs').existsSync(indexPath);
     res.sendFile(indexPath, (err) => {
         if (err) {
-            console.error(`SPA Error (v4.3.0): File exists? ${exists}. Path: ${indexPath}`, err);
-            res.status(404).send(`[Escalation Dashboard v4.3.0] Deployment Sync Error: Frontend files missing at ${indexPath}. Build check: ${exists}. Please ensure the build command succeeded.`);
+            console.error(`SPA Error (v4.3.1): File exists? ${exists}. Path: ${indexPath}`, err);
+            res.status(404).send(`[Escalation Dashboard v4.3.1] Deployment Sync Error: Frontend files missing at ${indexPath}. Build check: ${exists}. Please ensure the build command succeeded.`);
         }
     });
 });
@@ -136,12 +136,12 @@ const startServer = async () => {
         console.log('✅ MongoDB Connected');
 
         app.listen(PORT, '0.0.0.0', () => {
-            console.log(`🚀 Escalation Dashboard v4.3.0 - 3D PRO Live on port ${PORT}`);
+            console.log(`🚀 Escalation Dashboard v4.3.1 - 3D PRO Live on port ${PORT}`);
         });
     } catch (err) {
         console.error('❌ MongoDB Connection Error:', err.message);
         app.listen(PORT, '0.0.0.0', () => {
-            console.log(`🚀 Server running on port ${PORT} (v4.3.0 - DB Offline)`);
+            console.log(`🚀 Server running on port ${PORT} (v4.3.1 - DB Offline)`);
         });
     }
 };

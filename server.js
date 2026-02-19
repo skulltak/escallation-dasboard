@@ -105,17 +105,17 @@ app.delete('/api/escalations/:id', async (req, res) => {
 app.get('/health', (req, res) => res.send('OK'));
 
 // Standard Static serving (ROOT dist)
-app.use(express.static(path.join(__dirname, 'client', 'dist')));
+app.use(express.static(path.join(__dirname, 'dist')));
 
 // SPA Catch-all (MUST BE LAST)
 app.use((req, res, next) => {
     if (req.url.startsWith('/api')) return next();
-    const indexPath = path.join(__dirname, 'client', 'dist', 'index.html');
+    const indexPath = path.join(__dirname, 'dist', 'index.html');
     const exists = require('fs').existsSync(indexPath);
     res.sendFile(indexPath, (err) => {
         if (err) {
-            console.error(`SPA Error (v4.1.7): File exists? ${exists}. Path: ${indexPath}`, err);
-            res.status(404).send(`[Escalation Dashboard v4.1.7] Deployment Sync Error: Frontend files missing at ${indexPath}. Build check: ${exists}. Please ensure the build command succeeded.`);
+            console.error(`SPA Error (v4.1.8): File exists? ${exists}. Path: ${indexPath}`, err);
+            res.status(404).send(`[Escalation Dashboard v4.1.8] Deployment Sync Error: Frontend files missing at ${indexPath}. Build check: ${exists}. Please ensure the build command succeeded.`);
         }
     });
 });
@@ -136,12 +136,12 @@ const startServer = async () => {
         console.log('✅ MongoDB Connected');
 
         app.listen(PORT, '0.0.0.0', () => {
-            console.log(`🚀 Escalation Dashboard v4.1.7 - 3D PRO Live on port ${PORT}`);
+            console.log(`🚀 Escalation Dashboard v4.1.8 - 3D PRO Live on port ${PORT}`);
         });
     } catch (err) {
         console.error('❌ MongoDB Connection Error:', err.message);
         app.listen(PORT, '0.0.0.0', () => {
-            console.log(`🚀 Server running on port ${PORT} (v4.1.7 - DB Offline)`);
+            console.log(`🚀 Server running on port ${PORT} (v4.1.8 - DB Offline)`);
         });
     }
 };

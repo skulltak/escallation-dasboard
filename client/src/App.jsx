@@ -703,7 +703,7 @@ const App = () => {
       <main className={`main-content ${loading ? 'opacity-50' : ''}`}>
         <header className="top-bar">
           <div className="flex flex-col">
-            <h2 className="page-title">{view === 'dashboard' ? 'Overview' : 'Reports'} <span style={{ fontSize: '12px', opacity: 0.5, fontWeight: 'normal' }}>(v4.1.7)</span></h2>
+            <h2 className="page-title">{view === 'dashboard' ? 'Overview' : 'Reports'} <span style={{ fontSize: '12px', opacity: 0.5, fontWeight: 'normal' }}>(v4.1.8)</span></h2>
             <div className="text-xs flex items-center gap-1" style={{ opacity: 0.7 }}>
               Status: <span style={{ color: dbStatus === 'Connected' ? '#10b981' : '#ef4444', fontWeight: 'bold' }}>
                 {dbStatus === 'Connected' ? '🟢 Connected' : '🔴 Database Offline'}

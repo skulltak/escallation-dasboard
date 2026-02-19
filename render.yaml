@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: escallation-dasboard
+    runtime: node
+    buildCommand: npm run build
+    startCommand: npm start
+    envVars:
+      - key: MONGO_URI
+        sync: false
+      - key: PORT
+        value: 10000
+      - key: NODE_VERSION
+        value: 22.12.0

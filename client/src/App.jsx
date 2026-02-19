@@ -1,4 +1,4 @@
-// Build v4.7.0 - Searchable Brand & Aging Filters
+// Build v4.7.1 - Exact Aging Match Fix
 import React, { useState, useEffect, useMemo, useDeferredValue } from 'react';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
@@ -269,7 +269,7 @@ const App = () => {
         return false;
       })();
 
-      const matchesAging = deferredFilters.aging === "" || String(d.aging || 0).includes(deferredFilters.aging);
+      const matchesAging = deferredFilters.aging === "" || String(d.aging || 0) === deferredFilters.aging;
       const matchesBrand = deferredFilters.brand === "" || String(d.brand || "").toLowerCase().includes(String(deferredFilters.brand).toLowerCase());
       const matchesServiceType = deferredFilters.serviceType === "" || String(d.serviceType || "").toLowerCase() === String(deferredFilters.serviceType).toLowerCase();
 

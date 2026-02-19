@@ -28,7 +28,7 @@ console.error = (...args) => { logs.push(`[ERR] ${args.join(' ')}`); if (logs.le
 
 // API Routes
 app.get('/health', (req, res) => res.send('OK'));
-app.get('/api/info', (req, res) => res.json({ version: 'v4.7.0', limit: '50mb', db_status: mongoose.connection.readyState, time: new Date().toISOString() }));
+app.get('/api/info', (req, res) => res.json({ version: 'v4.7.1', limit: '50mb', db_status: mongoose.connection.readyState, time: new Date().toISOString() }));
 app.get('/api/logs', (req, res) => res.send(logs.join('\n')));
 
 app.get('/api/escalations', async (req, res) => {
@@ -136,12 +136,12 @@ const startServer = async () => {
         console.log('✅ MongoDB Connected');
 
         app.listen(PORT, '0.0.0.0', () => {
-            console.log(`🚀 Escalation Dashboard v4.7.0 - 3D PRO Live on port ${PORT}`);
+            console.log(`🚀 Escalation Dashboard v4.7.1 - 3D PRO Live on port ${PORT}`);
         });
     } catch (err) {
         console.error('❌ MongoDB Connection Error:', err.message);
         app.listen(PORT, '0.0.0.0', () => {
-            console.log(`🚀 Server running on port ${PORT} (v4.7.0 - DB Offline)`);
+            console.log(`🚀 Server running on port ${PORT} (v4.7.1 - DB Offline)`);
         });
     }
 };

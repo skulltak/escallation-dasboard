@@ -1,4 +1,4 @@
-// Build v4.7.2 - Stat Card Refinement
+// Build v4.8.0 - Red Glow Visual Enhancement
 import React, { useState, useEffect, useMemo, useDeferredValue } from 'react';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
@@ -44,6 +44,27 @@ ChartJS.register(
   Tooltip,
   Legend
 );
+const glowPlugin = {
+  id: 'glowPlugin',
+  beforeDatasetDraw(chart) {
+    const { ctx } = chart;
+    ctx.save();
+    const dataset = chart.data.datasets[0];
+    const meta = chart.getDatasetMeta(0);
+    meta.data.forEach((element, index) => {
+      const color = dataset.backgroundColor[index];
+      // Only apply glow to the Red segment (vibrant red)
+      if (color === '#ff0000' || color === '#ef4444' || color === '#b91c1c') {
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = 'rgba(239, 68, 68, 0.8)';
+      } else {
+        ctx.shadowBlur = 0;
+      }
+      element.draw(ctx);
+    });
+    ctx.restore();
+  }
+};
 
 const ParticleBackground = () => {
   const canvasRef = React.useRef(null);
@@ -634,7 +655,7 @@ const App = () => {
       labels: ['Open/New', 'Aging (>5 Days)', 'Closed', 'Cancelled'],
       datasets: [{
         data: [stats.open, stats.aging, stats.closed, stats.cancelled],
-        backgroundColor: ['#fef08a', '#b91c1c', '#10b981', '#94a3b8'],
+        backgroundColor: ['#fef08a', '#ff0000', '#10b981', '#94a3b8'],
         borderWidth: 0,
         hoverOffset: 4
       }]
@@ -814,9 +835,10 @@ const App = () => {
                             padding: 20,
                             font: { size: 12 }
                           }
-                        }
+                        },
+                        glowPlugin: {}
                       }
-                    }} />
+                    }} plugins={[glowPlugin]} />
                   </div>
                 </div>
                 <div className="chart-card">

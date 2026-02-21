@@ -185,6 +185,9 @@ const App = () => {
     serviceType: ''
   });
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [selectedAging, setSelectedAging] = useState(null);
+  const [agingDetailModalOpen, setAgingDetailModalOpen] = useState(false);
+  const agingChartRef = React.useRef(null);
 
   const deferredFilters = useDeferredValue(filters);
 
@@ -298,6 +301,15 @@ const App = () => {
     });
   }, [data, deferredFilters, user]);
 
+  const selectedAgingCases = useMemo(() => {
+    if (selectedAging === null) return [];
+    return filteredData.filter(d =>
+      String(d.status || '').toLowerCase() !== 'closed' &&
+      String(d.status || '').toLowerCase() !== 'cancelled' &&
+      Number(d.aging || 0) === selectedAging
+    );
+  }, [filteredData, selectedAging]);
+
   // Auth Handlers
   const handleLogin = (e) => {
     e.preventDefault();
@@ -338,6 +350,20 @@ const App = () => {
     sessionStorage.removeItem('appUser');
     setUser(null);
     setData([]);
+  };
+
+  const handleAgingChartClick = (event) => {
+    const { current: chart } = agingChartRef;
+    if (!chart) return;
+
+    const elements = chart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, true);
+    if (elements.length > 0) {
+      const index = elements[0].index;
+      const label = agingBarData.labels[index]; // e.g. "28 Days"
+      const agingValue = parseInt(label);
+      setSelectedAging(agingValue);
+      setAgingDetailModalOpen(true);
+    }
   };
 
   // CRUD Handlers
@@ -856,34 +882,38 @@ const App = () => {
                   <h3>{user?.role === 'ADMIN' ? 'Branch Escalation' : 'Case Aging'}</h3>
                   <div className="chart-container chart-scroll-container" style={{ overflowX: 'auto', overflowY: 'hidden', display: 'block', paddingBottom: '10px' }}>
                     <div style={{ width: `${Math.max(100, (user?.role === 'ADMIN' ? chartData.labels.length : agingBarData.labels.length) * 60)}px`, height: '300px', position: 'relative' }}>
-                      <Bar data={user?.role === 'ADMIN' ? chartData : agingBarData} options={{
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                          legend: { display: false },
-                          tooltip: {
-                            callbacks: {
-                              label: (context) => `Cases: ${context.raw}`
+                      <Bar
+                        ref={user?.role !== 'ADMIN' ? agingChartRef : null}
+                        onClick={user?.role !== 'ADMIN' ? handleAgingChartClick : undefined}
+                        data={user?.role === 'ADMIN' ? chartData : agingBarData}
+                        options={{
+                          responsive: true,
+                          maintainAspectRatio: false,
+                          plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                              callbacks: {
+                                label: (context) => `Cases: ${context.raw}`
+                              }
                             }
-                          }
-                        },
-                        scales: {
-                          y: {
-                            beginAtZero: true,
-                            grid: { color: 'rgba(0,0,0,0.05)' },
-                            title: { display: true, text: user?.role === 'ADMIN' ? 'Cases' : 'Case Count', font: { size: 10, weight: 'bold' } }
                           },
-                          x: {
-                            grid: { display: false },
-                            ticks: {
-                              autoSkip: false,
-                              maxRotation: 45,
-                              minRotation: 0,
-                              font: { size: 10 }
+                          scales: {
+                            y: {
+                              beginAtZero: true,
+                              grid: { color: 'rgba(0,0,0,0.05)' },
+                              title: { display: true, text: user?.role === 'ADMIN' ? 'Cases' : 'Case Count', font: { size: 10, weight: 'bold' } }
+                            },
+                            x: {
+                              grid: { display: false },
+                              ticks: {
+                                autoSkip: false,
+                                maxRotation: 45,
+                                minRotation: 0,
+                                font: { size: 10 }
+                              }
                             }
                           }
-                        }
-                      }} />
+                        }} />
                     </div>
                   </div>
                 </div>
@@ -1147,6 +1177,42 @@ const App = () => {
           </div>
         )
       }
+
+      {/* Aging Detail Modal */}
+      {agingDetailModalOpen && (
+        <div className="modal-overlay">
+          <div className="modal" style={{ maxWidth: '800px' }}>
+            <div className="modal-header">
+              <h3>Cases with {selectedAging} Days Aging</h3>
+              <X className="cursor-pointer" onClick={() => setAgingDetailModalOpen(false)} />
+            </div>
+            <div className="table-container" style={{ flex: 1, overflowY: 'auto' }}>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Brand</th>
+                    <th>ID</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {selectedAgingCases.map(row => (
+                    <tr key={row._id}>
+                      <td>{row.date}</td>
+                      <td>{row.brand}</td>
+                      <td>{row.id}</td>
+                      <td>
+                        <button onClick={() => { setAgingDetailModalOpen(false); openEditModal(row); }} className="btn-sm">View</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
     </div >
   );
 };

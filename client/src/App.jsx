@@ -618,15 +618,24 @@ const App = () => {
   }, [filteredData]);
 
   const agingBarData = useMemo(() => {
-    const cases = filteredData
-      .filter(d => String(d.status || '').toLowerCase() !== 'closed')
-      .sort((a, b) => Number(b.aging || 0) - Number(a.aging || 0));
+    const counts = {};
+    filteredData
+      .filter(d => String(d.status || '').toLowerCase() !== 'closed' && String(d.status || '').toLowerCase() !== 'cancelled')
+      .forEach(d => {
+        const aging = Number(d.aging || 0);
+        counts[aging] = (counts[aging] || 0) + 1;
+      });
+
+    const sortedAging = Object.keys(counts)
+      .map(Number)
+      .sort((a, b) => b - a);
+
     return {
-      labels: cases.map(d => d.id || d.brand || 'Case'),
+      labels: sortedAging.map(a => `${a} Days`),
       datasets: [{
-        label: 'Aging (Days)',
-        data: cases.map(d => Number(d.aging || 0)),
-        backgroundColor: cases.map(d => Number(d.aging || 0) > 5 ? '#ef4444' : '#6366f1'),
+        label: 'Number of Cases',
+        data: sortedAging.map(a => counts[a]),
+        backgroundColor: sortedAging.map(a => a > 5 ? '#ef4444' : '#6366f1'),
         borderRadius: 4
       }]
     };
@@ -851,10 +860,19 @@ const App = () => {
                         responsive: true,
                         maintainAspectRatio: false,
                         plugins: {
-                          legend: { display: false }
+                          legend: { display: false },
+                          tooltip: {
+                            callbacks: {
+                              label: (context) => `Cases: ${context.raw}`
+                            }
+                          }
                         },
                         scales: {
-                          y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' }, title: user?.role !== 'ADMIN' ? { display: true, text: 'Days' } : undefined },
+                          y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(0,0,0,0.05)' },
+                            title: { display: true, text: user?.role === 'ADMIN' ? 'Cases' : 'Case Count', font: { size: 10, weight: 'bold' } }
+                          },
                           x: {
                             grid: { display: false },
                             ticks: {

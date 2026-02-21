@@ -829,3 +829,28 @@ tr:hover td {
   min-height: 0;
   /* Important for nested scrolling in Flexbox */
 }
+.chart-scroll-container {
+  overflow-x: auto;
+  overflow-y: hidden;
+  display: block;
+  padding-bottom: 10px;
+}
+
+.chart-scroll-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.chart-scroll-container::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+}
+
+.chart-scroll-container::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 4px;
+  opacity: 0.5;
+}
+
+.chart-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-hover);
+}

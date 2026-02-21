@@ -1002,6 +1002,7 @@ const App = () => {
                       <thead>
                         <tr>
                           <th>Date</th>
+                          <th>Branch</th>
                           <th>Aging</th>
                           <th>Brand</th>
                           <th>ID</th>
@@ -1015,6 +1016,7 @@ const App = () => {
                         {filteredData.map(row => (
                           <tr key={row._id}>
                             <td>{row.date}</td>
+                            <td>{row.branch}</td>
                             <td>
                               <span className={`badge ${row.aging > 10 ? 'badge-danger' : row.aging > 5 ? 'badge-warning' : 'badge-success'}`}>
                                 {row.aging} Days

@@ -618,13 +618,16 @@ const App = () => {
   }, [filteredData]);
 
   const agingBarData = useMemo(() => {
-    const cases = filteredData.filter(d => String(d.status || '').toLowerCase() !== 'closed').slice(0, 20);
+    const cases = filteredData
+      .filter(d => String(d.status || '').toLowerCase() !== 'closed')
+      .sort((a, b) => Number(b.aging || 0) - Number(a.aging || 0))
+      .slice(0, 20);
     return {
       labels: cases.map(d => d.id || d.brand || 'Case'),
       datasets: [{
         label: 'Aging (Days)',
-        data: cases.map(d => d.aging || 0),
-        backgroundColor: cases.map(d => d.aging > 5 ? '#ef4444' : '#6366f1'),
+        data: cases.map(d => Number(d.aging || 0)),
+        backgroundColor: cases.map(d => Number(d.aging || 0) > 5 ? '#ef4444' : '#6366f1'),
         borderRadius: 4
       }]
     };
@@ -648,7 +651,7 @@ const App = () => {
       const s = String(d.status || "").toLowerCase();
       if (s === 'closed') stats.closed++;
       else if (s === 'cancelled') stats.cancelled++;
-      else if (d.aging > 5) stats.aging++;
+      else if (Number(d.aging || 0) > 5) stats.aging++;
       else stats.open++;
     });
     return {

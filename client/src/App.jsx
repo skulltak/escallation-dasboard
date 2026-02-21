@@ -644,24 +644,26 @@ const App = () => {
   }, [filteredData]);
 
   const agingBarData = useMemo(() => {
-    const counts = {};
-    filteredData
-      .filter(d => String(d.status || '').toLowerCase() !== 'closed' && String(d.status || '').toLowerCase() !== 'cancelled')
-      .forEach(d => {
-        const aging = Number(d.aging || 0);
-        counts[aging] = (counts[aging] || 0) + 1;
-      });
+    const activeData = filteredData.filter(d =>
+      String(d.status || '').toLowerCase() !== 'closed' &&
+      String(d.status || '').toLowerCase() !== 'cancelled'
+    );
 
-    const sortedAging = Object.keys(counts)
-      .map(Number)
-      .sort((a, b) => b - a);
+    const maxAging = activeData.reduce((max, d) => Math.max(max, Number(d.aging || 0)), 0);
+    const counts = {};
+    activeData.forEach(d => {
+      const aging = Number(d.aging || 0);
+      counts[aging] = (counts[aging] || 0) + 1;
+    });
+
+    const range = Array.from({ length: maxAging + 1 }, (_, i) => i);
 
     return {
-      labels: sortedAging.map(a => `${a} Days`),
+      labels: range.map(a => `${a} Days`),
       datasets: [{
         label: 'Number of Cases',
-        data: sortedAging.map(a => counts[a]),
-        backgroundColor: sortedAging.map(a => a > 5 ? '#ef4444' : '#6366f1'),
+        data: range.map(a => counts[a] || 0),
+        backgroundColor: range.map(a => a > 5 ? '#ef4444' : '#6366f1'),
         borderRadius: 4
       }]
     };

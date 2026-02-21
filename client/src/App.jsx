@@ -845,8 +845,8 @@ const App = () => {
                 </div>
                 <div className="chart-card">
                   <h3>{user?.role === 'ADMIN' ? 'Branch Escalation' : 'Case Aging'}</h3>
-                  <div className="chart-container" style={{ overflowX: 'auto', overflowY: 'hidden', display: 'block' }}>
-                    <div style={{ minWidth: `${Math.max(100, (user?.role === 'ADMIN' ? chartData.labels.length : agingBarData.labels.length) * 40)}px`, height: '100%', position: 'relative' }}>
+                  <div className="chart-container chart-scroll-container" style={{ overflowX: 'auto', overflowY: 'hidden', display: 'block', paddingBottom: '10px' }}>
+                    <div style={{ width: `${Math.max(100, (user?.role === 'ADMIN' ? chartData.labels.length : agingBarData.labels.length) * 60)}px`, height: '300px', position: 'relative' }}>
                       <Bar data={user?.role === 'ADMIN' ? chartData : agingBarData} options={{
                         responsive: true,
                         maintainAspectRatio: false,

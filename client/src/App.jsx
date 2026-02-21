@@ -620,8 +620,7 @@ const App = () => {
   const agingBarData = useMemo(() => {
     const cases = filteredData
       .filter(d => String(d.status || '').toLowerCase() !== 'closed')
-      .sort((a, b) => Number(b.aging || 0) - Number(a.aging || 0))
-      .slice(0, 20);
+      .sort((a, b) => Number(b.aging || 0) - Number(a.aging || 0));
     return {
       labels: cases.map(d => d.id || d.brand || 'Case'),
       datasets: [{
@@ -846,26 +845,28 @@ const App = () => {
                 </div>
                 <div className="chart-card">
                   <h3>{user?.role === 'ADMIN' ? 'Branch Escalation' : 'Case Aging'}</h3>
-                  <div className="chart-container">
-                    <Bar data={user?.role === 'ADMIN' ? chartData : agingBarData} options={{
-                      responsive: true,
-                      maintainAspectRatio: false,
-                      plugins: {
-                        legend: { display: false }
-                      },
-                      scales: {
-                        y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' }, title: user?.role !== 'ADMIN' ? { display: true, text: 'Days' } : undefined },
-                        x: {
-                          grid: { display: false },
-                          ticks: {
-                            autoSkip: false,
-                            maxRotation: 45,
-                            minRotation: 0,
-                            font: { size: 10 }
+                  <div className="chart-container" style={{ overflowX: 'auto', overflowY: 'hidden', display: 'block' }}>
+                    <div style={{ minWidth: `${Math.max(100, (user?.role === 'ADMIN' ? chartData.labels.length : agingBarData.labels.length) * 40)}px`, height: '100%', position: 'relative' }}>
+                      <Bar data={user?.role === 'ADMIN' ? chartData : agingBarData} options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                          legend: { display: false }
+                        },
+                        scales: {
+                          y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' }, title: user?.role !== 'ADMIN' ? { display: true, text: 'Days' } : undefined },
+                          x: {
+                            grid: { display: false },
+                            ticks: {
+                              autoSkip: false,
+                              maxRotation: 45,
+                              minRotation: 0,
+                              font: { size: 10 }
+                            }
                           }
                         }
-                      }
-                    }} />
+                      }} />
+                    </div>
                   </div>
                 </div>
                 <div className="chart-card">

@@ -71,25 +71,18 @@ const formatDisplayDate = (dateStr) => {
   if (!dateStr) return 'N/A';
   try {
     const parts = String(dateStr).split('-');
-    let dateObj;
     if (parts.length === 3) {
+      let y, m, d;
+      // Handle both YYYY-MM-DD and DD-MM-YYYY in DB
       if (parts[0].length === 4) {
-        // YYYY-MM-DD
-        dateObj = new Date(parts[0], parts[1] - 1, parts[2]);
+        [y, m, d] = parts;
       } else {
-        // DD-MM-YYYY
-        dateObj = new Date(parts[2], parts[1] - 1, parts[0]);
+        [d, m, y] = parts;
       }
-    } else {
-      dateObj = new Date(dateStr);
+      // User specifically wants YYYY-DD-MM (Year-Day-Month)
+      return `${y}-${d.padStart(2, '0')}-${m.padStart(2, '0')}`;
     }
-
-    if (isNaN(dateObj.getTime())) return dateStr;
-    return dateObj.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
-    }).replace(/ /g, '-');
+    return dateStr;
   } catch (e) {
     return dateStr;
   }
@@ -315,28 +308,28 @@ const App = () => {
       const matchesDate = deferredFilters.date === "" || (() => {
         if (!d.date) return false;
         const dbDateStr = String(d.date).trim();
-        const searchDate = deferredFilters.date; // YYYY-MM-DD from input
+        const searchDate = deferredFilters.date; // YYYY-MM-DD from picker
 
-        const normalized = normalizeDateForCompare(dbDateStr);
-        if (normalized === searchDate) return true;
+        // 1. Precise components
+        const dbParts = dbDateStr.split('-');
+        if (dbParts.length !== 3) return dbDateStr.includes(searchDate);
 
-        // Try swap month/day if ambiguous
-        const parts = dbDateStr.split('-');
-        if (parts.length === 3) {
-          let y, m, day;
-          if (parts[0].length === 4) { [y, m, day] = parts; }
-          else { [day, m, y] = parts; }
-
-          const monthInt = parseInt(m);
-          const dayInt = parseInt(day);
-
-          if (monthInt <= 12 && dayInt <= 12 && monthInt !== dayInt) {
-            const swapped = `${y}-${String(dayInt).padStart(2, '0')}-${String(monthInt).padStart(2, '0')}`;
-            if (swapped === searchDate) return true;
-          }
+        let y, dPart, mPart;
+        if (dbParts[0].length === 4) {
+          [y, mPart, dPart] = dbParts;
+        } else {
+          [dPart, mPart, y] = dbParts;
         }
 
-        return dbDateStr.includes(searchDate);
+        const yS = String(y);
+        const mS = String(mPart).padStart(2, '0');
+        const dS = String(dPart).padStart(2, '0');
+
+        // Check searchDate (YYYY-MM-DD from picker) against both interpretations
+        if (`${yS}-${mS}-${dS}` === searchDate) return true; // Standard
+        if (`${yS}-${dS}-${mS}` === searchDate) return true; // Swapped
+
+        return false;
       })();
 
       const matchesAging = deferredFilters.aging === "" || String(d.aging || 0) === deferredFilters.aging;
@@ -636,22 +629,24 @@ const App = () => {
       const dbDateStr = String(d.date).trim();
       const searchDate = deferredFilters.date;
 
-      const normalized = normalizeDateForCompare(dbDateStr);
-      if (normalized === searchDate) return true;
+      const dbParts = dbDateStr.split('-');
+      if (dbParts.length !== 3) return dbDateStr.includes(searchDate);
 
-      const parts = dbDateStr.split('-');
-      if (parts.length === 3) {
-        let y, m, day;
-        if (parts[0].length === 4) { [y, m, day] = parts; }
-        else { [day, m, y] = parts; }
-        const monthInt = parseInt(m);
-        const dayInt = parseInt(day);
-        if (monthInt <= 12 && dayInt <= 12 && monthInt !== dayInt) {
-          const swapped = `${y}-${String(dayInt).padStart(2, '0')}-${String(monthInt).padStart(2, '0')}`;
-          if (swapped === searchDate) return true;
-        }
+      let y, dPart, mPart;
+      if (dbParts[0].length === 4) {
+        [y, mPart, dPart] = dbParts;
+      } else {
+        [dPart, mPart, y] = dbParts;
       }
-      return dbDateStr.includes(searchDate);
+
+      const yS = String(y);
+      const mS = String(mPart).padStart(2, '0');
+      const dS = String(dPart).padStart(2, '0');
+
+      if (`${yS}-${mS}-${dS}` === searchDate) return true;
+      if (`${yS}-${dS}-${mS}` === searchDate) return true;
+
+      return false;
     }) : relevant;
 
     const stats = {};

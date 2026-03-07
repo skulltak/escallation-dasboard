@@ -53,7 +53,8 @@ const glowPlugin = {
     const dataset = chart.data.datasets[0];
     const meta = chart.getDatasetMeta(0);
     meta.data.forEach((element, index) => {
-      const color = dataset.backgroundColor[index];
+      const color = dataset.backgroundColor && dataset.backgroundColor[index];
+      if (!color) return;
       // Only apply glow to the Red segment (vibrant red)
       if (color === '#ff0000' || color === '#ef4444' || color === '#b91c1c') {
         ctx.shadowBlur = 15;
@@ -61,7 +62,9 @@ const glowPlugin = {
       } else {
         ctx.shadowBlur = 0;
       }
-      element.draw(ctx);
+      if (element && typeof element.draw === 'function') {
+        element.draw(ctx);
+      }
     });
     ctx.restore();
   }
@@ -112,7 +115,7 @@ const ParticleBackground = () => {
 
     const colors = ['#4285F4', '#EA4335', '#FBBC05', '#34A853', '#6366F1', '#A855F7'];
     const particles = [];
-    const particleCount = 100;
+    const particleCount = 20;
     const focalLength = 300;
 
     const resize = () => {
@@ -240,6 +243,20 @@ const App = () => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState('');
+
+  // Global Error Reporter
+  useEffect(() => {
+    const handleError = (event) => {
+      const msg = event.error?.message || event.message || 'Unknown Javascript Error';
+      console.error('Captured Global Error:', event.error);
+      showToast(`⚠️ UI Error: ${msg}. Please refresh.`, 'error');
+    };
+    window.addEventListener('error', handleError);
+    window.addEventListener('unhandledrejection', (e) => {
+      showToast('⚠️ Async Error: ' + (e.reason?.message || 'Database connection lost'), 'error');
+    });
+    return () => window.removeEventListener('error', handleError);
+  }, []);
 
   // Auth Effects
   useEffect(() => {

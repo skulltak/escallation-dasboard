@@ -682,18 +682,19 @@ const App = () => {
   }, [filteredData]);
 
   const doughnutData = useMemo(() => {
-    const stats = { open: 0, closed: 0, cancelled: 0 };
+    const stats = { open: 0, aging: 0, closed: 0, cancelled: 0 };
     filteredData.forEach(d => {
       const s = String(d.status || "").toLowerCase();
       if (s === 'closed') stats.closed++;
       else if (s === 'cancelled') stats.cancelled++;
+      else if (Number(d.aging || 0) > 5) stats.aging++;
       else stats.open++;
     });
     return {
-      labels: ['Open', 'Closed', 'Cancelled'],
+      labels: ['Open/New', 'Aging (>5 Days)', 'Closed', 'Cancelled'],
       datasets: [{
-        data: [stats.open, stats.closed, stats.cancelled],
-        backgroundColor: ['#6366f1', '#10b981', '#94a3b8'],
+        data: [stats.open, stats.aging, stats.closed, stats.cancelled],
+        backgroundColor: ['#fef08a', '#ff0000', '#10b981', '#94a3b8'],
         borderWidth: 0,
         hoverOffset: 4
       }]

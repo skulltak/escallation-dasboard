@@ -17,9 +17,10 @@ import {
   Trash2,
   X,
   Edit2,
-  ChevronLeft,
   ChevronRight,
-  XCircle
+  XCircle,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import {
@@ -238,6 +239,9 @@ const App = () => {
     remark: ''
   });
 
+  const [showPassword, setShowPassword] = useState(false);
+  const [loginError, setLoginError] = useState('');
+
   // Auth Effects
   useEffect(() => {
     const savedUser = sessionStorage.getItem('appUser');
@@ -352,10 +356,11 @@ const App = () => {
   // Auth Handlers
   const handleLogin = (e) => {
     e.preventDefault();
+    setLoginError('');
     const u = e.target.loginUser.value.trim().toUpperCase();
     const p = e.target.loginPass.value;
 
-    if (p === "VECARE") {
+    if (p === "Vecare@2026") {
       const uUpper = u.toUpperCase();
       let branchRef = BRANCHES.find(b => b.toUpperCase() === uUpper);
 
@@ -378,10 +383,12 @@ const App = () => {
           setFormData(prev => ({ ...prev, branch: newUser.role }));
         }
       } else {
+        setLoginError('Invalid Username/Branch ID');
         showToast('Invalid Username/Branch ID', 'error');
       }
     } else {
-      showToast('Invalid Password', 'error');
+      setLoginError('Warning: Incorrect Password');
+      showToast('Warning: Incorrect Password', 'error');
     }
   };
 
@@ -779,8 +786,47 @@ const App = () => {
           <p className="login-subtitle">Secure Access Management</p>
           <div className="flex flex-col gap-1">
             <input name="loginUser" type="text" className="login-input" placeholder="Username / ID" required />
-            <input name="loginPass" type="password" className="login-input" placeholder="Password" required />
+            <div style={{ position: 'relative' }}>
+              <input
+                name="loginPass"
+                type={showPassword ? "text" : "password"}
+                className="login-input"
+                placeholder="Password"
+                required
+                style={{ paddingRight: '3.5rem' }}
+              />
+              <div
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute',
+                  right: '1.25rem',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  marginTop: '-0.6rem',
+                  cursor: 'pointer',
+                  color: 'var(--text-muted)',
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </div>
+            </div>
           </div>
+          {loginError && (
+            <div style={{
+              color: 'var(--danger)',
+              fontSize: '0.85rem',
+              textAlign: 'center',
+              marginBottom: '1rem',
+              background: 'rgba(239, 68, 68, 0.1)',
+              padding: '0.5rem',
+              borderRadius: '0.5rem',
+              fontWeight: '600'
+            }}>
+              {loginError}
+            </div>
+          )}
           <button type="submit" className="btn-login">Enter Dashboard</button>
         </form>
       </div>

@@ -112,7 +112,7 @@ const ParticleBackground = () => {
 
     const colors = ['#4285F4', '#EA4335', '#FBBC05', '#34A853', '#6366F1', '#A855F7'];
     const particles = [];
-    const particleCount = 400;
+    const particleCount = 100;
     const focalLength = 300;
 
     const resize = () => {
@@ -179,8 +179,7 @@ const ParticleBackground = () => {
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Sort particles by depth for basic z-indexing (further first)
-      particles.sort((a, b) => b.z3d - a.z3d);
+      // No sorting for speed
 
       particles.forEach(p => {
         p.update();
@@ -700,7 +699,8 @@ const App = () => {
       String(d.status || '').toLowerCase() !== 'cancelled'
     );
 
-    const maxAging = activeData.reduce((max, d) => Math.max(max, Number(d.aging || 0)), 0);
+    const maxAgingRaw = activeData.reduce((max, d) => Math.max(max, Number(d.aging || 0)), 0);
+    const maxAging = Math.min(maxAgingRaw, 100); // Cap at 100 to prevent crash if data is bad
     const counts = {};
     activeData.forEach(d => {
       const aging = Number(d.aging || 0);

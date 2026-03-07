@@ -102,105 +102,35 @@ const normalizeDateForCompare = (dateStr) => {
   }
   return null;
 };
-
+// Error Boundary Component
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error("Uncaught error:", error, errorInfo);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#f8fafc', padding: '2rem', textAlign: 'center' }}>
+          <h1 style={{ color: '#ef4444' }}>⚠️ Something went wrong</h1>
+          <p style={{ color: '#64748b' }}>{this.state.error && this.state.error.toString()}</p>
+          <button onClick={() => window.location.reload()} style={{ marginTop: '1rem', padding: '0.5rem 1rem', background: '#6366f1', color: 'white', border: 'none', borderRadius: '0.5rem', cursor: 'pointer' }}>Reload Page</button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 const ParticleBackground = () => {
-  const canvasRef = React.useRef(null);
-  const mouseRef = React.useRef({ x: 0, y: 0 });
-
-  React.useEffect(() => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    let animationFrameId;
-
-    const colors = ['#4285F4', '#EA4335', '#FBBC05', '#34A853', '#6366F1', '#A855F7'];
-    const particles = [];
-    const particleCount = 20;
-    const focalLength = 300;
-
-    const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-
-    const handleMouseMove = (e) => {
-      mouseRef.current.x = (e.clientX - window.innerWidth / 2) * 0.05;
-      mouseRef.current.y = (e.clientY - window.innerHeight / 2) * 0.05;
-    };
-
-    window.addEventListener('resize', resize);
-    window.addEventListener('mousemove', handleMouseMove);
-    resize();
-
-    class Particle3D {
-      constructor() {
-        this.init();
-      }
-
-      init() {
-        this.x3d = (Math.random() - 0.5) * 2000;
-        this.y3d = (Math.random() - 0.5) * 2000;
-        this.z3d = Math.random() * 2000;
-        this.vz = -2 - Math.random() * 5; // Speed towards viewer
-        this.radius = Math.random() * 1.5 + 0.5;
-        this.color = colors[Math.floor(Math.random() * colors.length)];
-      }
-
-      update() {
-        this.z3d += this.vz;
-
-        // Reset if passed viewer or distance
-        if (this.z3d <= 0) {
-          this.z3d = 2000;
-          this.x3d = (Math.random() - 0.5) * 2000;
-          this.y3d = (Math.random() - 0.5) * 2000;
-        }
-      }
-
-      draw() {
-        // Perspective Projection
-        const scale = focalLength / (focalLength + this.z3d);
-        const x2d = (this.x3d + mouseRef.current.x) * scale + canvas.width / 2;
-        const y2d = (this.y3d + mouseRef.current.y) * scale + canvas.height / 2;
-        const currentRadius = this.radius * scale * 5;
-
-        if (x2d > 0 && x2d < canvas.width && y2d > 0 && y2d < canvas.height) {
-          ctx.beginPath();
-          ctx.arc(x2d, y2d, currentRadius, 0, Math.PI * 2);
-          ctx.fillStyle = this.color;
-          ctx.globalAlpha = Math.min(1, scale * 10); // Fade in as they get closer
-          ctx.fill();
-          ctx.globalAlpha = 1;
-        }
-      }
-    }
-
-    for (let i = 0; i < particleCount; i++) {
-      particles.push(new Particle3D());
-    }
-
-    const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // No sorting for speed
-
-      particles.forEach(p => {
-        p.update();
-        p.draw();
-      });
-      animationFrameId = requestAnimationFrame(animate);
-    };
-
-    animate();
-
-    return () => {
-      window.removeEventListener('resize', resize);
-      window.removeEventListener('mousemove', handleMouseMove);
-      cancelAnimationFrame(animationFrameId);
-    };
-  }, []);
-
-  return <canvas ref={canvasRef} className="particle-canvas" />;
+  // Animation disabled for performance stability
+  return null;
 };
 
 const App = () => {
@@ -646,9 +576,10 @@ const App = () => {
 
   // Report Logic
   const reportData = useMemo(() => {
+    if (!Array.isArray(data)) return [];
     const relevant = user?.role === "ADMIN" ? data : data.filter(d => String(d.branch || "").toLowerCase() === String(user?.role || "").toLowerCase());
     const filtered = deferredFilters.date ? relevant.filter(d => {
-      if (!d.date) return false;
+      if (!d || !d.date) return false;
       const dbDateStr = String(d.date).trim();
       const searchDate = deferredFilters.date;
 
@@ -673,14 +604,16 @@ const App = () => {
     }) : relevant;
 
     const stats = {};
-    BRANCHES.forEach(b => {
-      if (user?.role !== "ADMIN" && b.toLowerCase() !== String(user?.role || "").toLowerCase()) return;
+    const branchList = Array.isArray(BRANCHES) ? BRANCHES : [];
+    branchList.forEach(b => {
+      if (user?.role && user.role !== "ADMIN" && b.toLowerCase() !== String(user.role).toLowerCase()) return;
       stats[b] = { total: 0, open: 0, closed: 0, totalAging: 0 };
     });
 
     filtered.forEach(d => {
+      if (!d) return;
       // Find the canonical branch name for the stat bucket
-      const canonicalBranch = BRANCHES.find(b => b.toLowerCase() === String(d.branch || "").toLowerCase());
+      const canonicalBranch = branchList.find(b => b.toLowerCase() === String(d.branch || "").toLowerCase());
       if (!canonicalBranch || !stats[canonicalBranch]) return;
 
       stats[canonicalBranch].total++;
@@ -699,19 +632,22 @@ const App = () => {
   }, [data, deferredFilters, user]);
 
   const chartData = useMemo(() => {
-    const branches = [...new Set(filteredData.map(d => d.branch))].slice(0, 10);
+    if (!Array.isArray(filteredData)) return { labels: [], datasets: [] };
+    const branches = [...new Set(filteredData.map(d => d.branch))].filter(Boolean).slice(0, 10);
     return {
       labels: branches,
       datasets: [{
         label: 'Open Cases',
-        data: branches.map(b => filteredData.filter(d => d.branch === b && String(d.status || "").toLowerCase() === 'open').length),
+        data: branches.map(b => filteredData.filter(d => d && d.branch === b && String(d.status || "").toLowerCase() === 'open').length),
         backgroundColor: '#6366f1'
       }]
     };
   }, [filteredData]);
 
   const agingBarData = useMemo(() => {
+    if (!Array.isArray(filteredData)) return { labels: [], datasets: [] };
     const activeData = filteredData.filter(d =>
+      d &&
       String(d.status || '').toLowerCase() !== 'closed' &&
       String(d.status || '').toLowerCase() !== 'cancelled'
     );
@@ -738,11 +674,13 @@ const App = () => {
   }, [filteredData]);
 
   const brandBarData = useMemo(() => {
+    const brands = Array.isArray(BRANDS) ? BRANDS : [];
+    if (!Array.isArray(filteredData)) return { labels: brands, datasets: [] };
     return {
-      labels: BRANDS,
+      labels: brands,
       datasets: [{
         label: 'Cases by Brand',
-        data: BRANDS.map(brand => filteredData.filter(d => String(d.brand || "").toLowerCase() === brand.toLowerCase()).length),
+        data: brands.map(brand => filteredData.filter(d => d && String(d.brand || "").toLowerCase() === brand.toLowerCase()).length),
         backgroundColor: '#6366f1',
         borderRadius: 4
       }]
@@ -751,13 +689,16 @@ const App = () => {
 
   const doughnutData = useMemo(() => {
     const stats = { open: 0, aging: 0, closed: 0, cancelled: 0 };
-    filteredData.forEach(d => {
-      const s = String(d.status || "").toLowerCase();
-      if (s === 'closed') stats.closed++;
-      else if (s === 'cancelled') stats.cancelled++;
-      else if (Number(d.aging || 0) > 5) stats.aging++;
-      else stats.open++;
-    });
+    if (Array.isArray(filteredData)) {
+      filteredData.forEach(d => {
+        if (!d) return;
+        const s = String(d.status || "").toLowerCase();
+        if (s === 'closed') stats.closed++;
+        else if (s === 'cancelled') stats.cancelled++;
+        else if (Number(d.aging || 0) > 5) stats.aging++;
+        else stats.open++;
+      });
+    }
     return {
       labels: ['Open/New', 'Aging (>5 Days)', 'Closed', 'Cancelled'],
       datasets: [{
@@ -1328,4 +1269,8 @@ const App = () => {
   );
 };
 
-export default App;
+export default () => (
+  <ErrorBoundary>
+    <App />
+  </ErrorBoundary>
+);

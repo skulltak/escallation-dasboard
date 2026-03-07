@@ -18,6 +18,7 @@ import {
   X,
   Edit2,
   ChevronRight,
+  ChevronLeft,
   XCircle,
   Eye,
   EyeOff

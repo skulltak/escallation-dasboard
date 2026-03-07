@@ -130,8 +130,13 @@ class ErrorBoundary extends React.Component {
 }
 
 const ParticleBackground = () => {
-  // Animation disabled for performance stability
-  return null;
+  return (
+    <div className="fixed inset-0 overflow-hidden" style={{ zIndex: -1, pointerEvents: 'none' }}>
+      <div className="floating-blob blob-1" />
+      <div className="floating-blob blob-2" />
+      <div className="floating-blob blob-3" />
+    </div>
+  );
 };
 
 const App = () => {

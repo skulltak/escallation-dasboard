@@ -76,6 +76,63 @@ body::after {
   }
 }
 
+@keyframes float {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+.floating-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  z-index: -1;
+  opacity: 0.4;
+  will-change: transform;
+  animation: float 20s infinite ease-in-out;
+}
+
+.blob-1 {
+  width: 400px;
+  height: 400px;
+  background: rgba(99, 102, 241, 0.3);
+  top: 10%;
+  left: 10%;
+  animation-duration: 25s;
+}
+
+.blob-2 {
+  width: 350px;
+  height: 350px;
+  background: rgba(16, 185, 129, 0.2);
+  bottom: 10%;
+  right: 15%;
+  animation-duration: 30s;
+  animation-delay: -5s;
+}
+
+.blob-3 {
+  width: 300px;
+  height: 300px;
+  background: rgba(234, 67, 53, 0.15);
+  top: 40%;
+  right: 10%;
+  animation-duration: 22s;
+  animation-delay: -10s;
+}
+
 h1,
 h2,
 h3,
@@ -829,6 +886,7 @@ tr:hover td {
   min-height: 0;
   /* Important for nested scrolling in Flexbox */
 }
+
 .chart-scroll-container {
   overflow-x: auto;
   overflow-y: hidden;

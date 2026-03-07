@@ -636,8 +636,8 @@ const App = () => {
     return {
       labels: branches,
       datasets: [{
-        label: 'Cases',
-        data: branches.map(b => filteredData.filter(d => d.branch === b).length),
+        label: 'Open Cases',
+        data: branches.map(b => filteredData.filter(d => d.branch === b && String(d.status || "").toLowerCase() === 'open').length),
         backgroundColor: '#6366f1'
       }]
     };
@@ -682,19 +682,18 @@ const App = () => {
   }, [filteredData]);
 
   const doughnutData = useMemo(() => {
-    const stats = { open: 0, aging: 0, closed: 0, cancelled: 0 };
+    const stats = { open: 0, closed: 0, cancelled: 0 };
     filteredData.forEach(d => {
       const s = String(d.status || "").toLowerCase();
       if (s === 'closed') stats.closed++;
       else if (s === 'cancelled') stats.cancelled++;
-      else if (Number(d.aging || 0) > 5) stats.aging++;
       else stats.open++;
     });
     return {
-      labels: ['Open/New', 'Aging (>5 Days)', 'Closed', 'Cancelled'],
+      labels: ['Open', 'Closed', 'Cancelled'],
       datasets: [{
-        data: [stats.open, stats.aging, stats.closed, stats.cancelled],
-        backgroundColor: ['#fef08a', '#ff0000', '#10b981', '#94a3b8'],
+        data: [stats.open, stats.closed, stats.cancelled],
+        backgroundColor: ['#6366f1', '#10b981', '#94a3b8'],
         borderWidth: 0,
         hoverOffset: 4
       }]
@@ -860,7 +859,7 @@ const App = () => {
 
               <div className={`charts-grid ${loading ? 'opacity-20' : ''}`}>
                 <div className="chart-card">
-                  <h3>Status Mix</h3>
+                  <h3>Status</h3>
                   <div className="chart-container">
                     <Doughnut data={doughnutData} options={{
                       responsive: true,
@@ -881,7 +880,7 @@ const App = () => {
                   </div>
                 </div>
                 <div className="chart-card">
-                  <h3>{user?.role === 'ADMIN' ? 'Branch Escalation' : 'Case Aging'}</h3>
+                  <h3>{user?.role === 'ADMIN' ? 'Branch Wise Escalation' : 'Case Aging'}</h3>
                   <div className="chart-container chart-scroll-container" style={{ overflowX: 'auto', overflowY: 'hidden', display: 'block', paddingBottom: '10px' }}>
                     <div style={{ width: `${Math.max(100, (user?.role === 'ADMIN' ? chartData.labels.length : agingBarData.labels.length) * 60)}px`, height: '300px', position: 'relative' }}>
                       <Bar

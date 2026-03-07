@@ -1,4 +1,4 @@
-export const BRANCHES = ["Andhra Pradesh", "Bangalore", "Chennai", "Hyderabad", "Madhya Pradesh", "Mum_Thn", "Rajasthan", "RO TEL", "RO KAR", "RO TN", "ROM", "UP EAST", "Uttar Pradesh", "West Bengal", "UP WEST"];
+export const BRANCHES = ["Andhra Pradesh", "Bangalore", "Chennai", "Delhi", "Hyderabad", "Madhya Pradesh", "Mum_Thn", "Rajasthan", "RO TEL", "RO KAR", "RO TN", "ROM", "UP EAST", "Uttar Pradesh", "West Bengal", "UP WEST"];
 
 export const BRANDS = ["VW", "SPPL", "VIDEOCON", "AMAZON", "NIPPO", "LEDVANCE", "AERO NERO"];
 

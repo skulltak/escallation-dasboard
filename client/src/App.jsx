@@ -66,6 +66,47 @@ const glowPlugin = {
   }
 };
 
+// Date Helpers
+const formatDisplayDate = (dateStr) => {
+  if (!dateStr) return 'N/A';
+  try {
+    const parts = String(dateStr).split('-');
+    let dateObj;
+    if (parts.length === 3) {
+      if (parts[0].length === 4) {
+        // YYYY-MM-DD
+        dateObj = new Date(parts[0], parts[1] - 1, parts[2]);
+      } else {
+        // DD-MM-YYYY
+        dateObj = new Date(parts[2], parts[1] - 1, parts[0]);
+      }
+    } else {
+      dateObj = new Date(dateStr);
+    }
+
+    if (isNaN(dateObj.getTime())) return dateStr;
+    return dateObj.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    }).replace(/ /g, '-');
+  } catch (e) {
+    return dateStr;
+  }
+};
+
+const normalizeDateForCompare = (dateStr) => {
+  if (!dateStr) return null;
+  const parts = String(dateStr).split('-');
+  if (parts.length === 3) {
+    if (parts[0].length === 4) return dateStr; // Already YYYY-MM-DD
+    const [d, m, y] = parts;
+    return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+  }
+  return null;
+};
+
+
 const ParticleBackground = () => {
   const canvasRef = React.useRef(null);
   const mouseRef = React.useRef({ x: 0, y: 0 });
@@ -274,23 +315,28 @@ const App = () => {
       const matchesDate = deferredFilters.date === "" || (() => {
         if (!d.date) return false;
         const dbDateStr = String(d.date).trim();
-        const searchStr = String(deferredFilters.date).trim().toLowerCase();
+        const searchDate = deferredFilters.date; // YYYY-MM-DD from input
 
-        // Check if the search string is present in the DB date (handles partial matches like "16" or "2026")
-        if (dbDateStr.toLowerCase().includes(searchStr)) return true;
+        const normalized = normalizeDateForCompare(dbDateStr);
+        if (normalized === searchDate) return true;
 
-        // Also check converted format for matching YYYY-MM-DD input against DD-MM-YYYY DB
-        if (dbDateStr.includes('-')) {
-          const parts = dbDateStr.split('-');
-          if (parts.length === 3) {
-            if (parts[0].length !== 4) { // DD-MM-YYYY in DB
-              const [day, month, year] = parts;
-              const converted = `${year}-${month}-${day}`;
-              if (converted.includes(searchStr)) return true;
-            }
+        // Try swap month/day if ambiguous
+        const parts = dbDateStr.split('-');
+        if (parts.length === 3) {
+          let y, m, day;
+          if (parts[0].length === 4) { [y, m, day] = parts; }
+          else { [day, m, y] = parts; }
+
+          const monthInt = parseInt(m);
+          const dayInt = parseInt(day);
+
+          if (monthInt <= 12 && dayInt <= 12 && monthInt !== dayInt) {
+            const swapped = `${y}-${String(dayInt).padStart(2, '0')}-${String(monthInt).padStart(2, '0')}`;
+            if (swapped === searchDate) return true;
           }
         }
-        return false;
+
+        return dbDateStr.includes(searchDate);
       })();
 
       const matchesAging = deferredFilters.aging === "" || String(d.aging || 0) === deferredFilters.aging;
@@ -588,21 +634,24 @@ const App = () => {
     const filtered = deferredFilters.date ? relevant.filter(d => {
       if (!d.date) return false;
       const dbDateStr = String(d.date).trim();
-      const searchStr = String(deferredFilters.date).trim().toLowerCase();
+      const searchDate = deferredFilters.date;
 
-      if (dbDateStr.toLowerCase().includes(searchStr)) return true;
+      const normalized = normalizeDateForCompare(dbDateStr);
+      if (normalized === searchDate) return true;
 
-      if (dbDateStr.includes('-')) {
-        const parts = dbDateStr.split('-');
-        if (parts.length === 3) {
-          if (parts[0].length !== 4) { // DD-MM-YYYY
-            const [day, month, year] = parts;
-            const converted = `${year}-${month}-${day}`;
-            if (converted.includes(searchStr)) return true;
-          }
+      const parts = dbDateStr.split('-');
+      if (parts.length === 3) {
+        let y, m, day;
+        if (parts[0].length === 4) { [y, m, day] = parts; }
+        else { [day, m, y] = parts; }
+        const monthInt = parseInt(m);
+        const dayInt = parseInt(day);
+        if (monthInt <= 12 && dayInt <= 12 && monthInt !== dayInt) {
+          const swapped = `${y}-${String(dayInt).padStart(2, '0')}-${String(monthInt).padStart(2, '0')}`;
+          if (swapped === searchDate) return true;
         }
       }
-      return false;
+      return dbDateStr.includes(searchDate);
     }) : relevant;
 
     const stats = {};
@@ -1015,7 +1064,7 @@ const App = () => {
                       <tbody>
                         {filteredData.map(row => (
                           <tr key={row._id}>
-                            <td>{row.date}</td>
+                            <td>{formatDisplayDate(row.date)}</td>
                             <td>{row.branch}</td>
                             <td>
                               <span className={`badge ${row.aging > 10 ? 'badge-danger' : row.aging > 5 ? 'badge-warning' : 'badge-success'}`}>
@@ -1203,7 +1252,7 @@ const App = () => {
                 <tbody>
                   {selectedAgingCases.map(row => (
                     <tr key={row._id}>
-                      <td>{row.date}</td>
+                      <td>{formatDisplayDate(row.date)}</td>
                       <td>{row.brand}</td>
                       <td>{row.id}</td>
                       <td>

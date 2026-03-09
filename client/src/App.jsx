@@ -362,12 +362,12 @@ const App = () => {
         };
         setUser(newUser);
         sessionStorage.setItem('appUser', JSON.stringify(newUser));
+        // Apple welcome effect for all users
+        setShowAppleWelcome(true);
+        setTimeout(() => setShowAppleWelcome(false), 3500);
         if (newUser.role !== 'ADMIN') {
           setFilters(prev => ({ ...prev, branch: newUser.role }));
           setFormData(prev => ({ ...prev, branch: newUser.role }));
-          // Apple welcome effect for branch
-          setShowAppleWelcome(true);
-          setTimeout(() => setShowAppleWelcome(false), 3000);
         }
       } else {
         setLoginError('Invalid Username/Branch ID');

@@ -917,44 +917,60 @@ tr:hover td {
 .apple-welcome-overlay {
   position: fixed;
   inset: 0;
-  background-color: #000;
+  background: radial-gradient(ellipse at center, #0d0d0d 0%, #000 100%);
   z-index: 9999;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  animation: fadeOutOverlay 0.8s ease-in-out forwards;
-  animation-delay: 2.2s;
-  /* Start fading out background after 2.2s */
+  animation: fadeOutOverlay 1s ease-in-out forwards;
+  animation-delay: 2.5s;
 }
 
 .apple-welcome-text {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 5.5rem;
   color: #fff;
-  font-size: 3rem;
-  font-weight: 300;
-  letter-spacing: -0.02em;
   opacity: 0;
-  animation: fadeInOutText 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  letter-spacing: 0.02em;
+  /* Layered 3D text shadow */
+  text-shadow:
+    0 1px 0 #cccccc,
+    0 2px 0 #b3b3b3,
+    0 3px 0 #999,
+    0 4px 0 #888,
+    0 5px 0 #777,
+    0 6px 1px rgba(0, 0, 0, .1),
+    0 0 5px rgba(0, 0, 0, .1),
+    0 1px 3px rgba(0, 0, 0, .3),
+    0 3px 5px rgba(0, 0, 0, .2),
+    0 5px 10px rgba(0, 0, 0, .25),
+    0 10px 10px rgba(0, 0, 0, .2),
+    0 20px 20px rgba(0, 0, 0, .15);
+  animation: fadeInOutText 2.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 @keyframes fadeInOutText {
   0% {
     opacity: 0;
-    transform: scale(0.95);
+    transform: translateY(20px) scale(0.9) perspective(600px) rotateX(15deg);
   }
 
-  30% {
+  25% {
     opacity: 1;
-    transform: scale(1);
+    transform: translateY(0px) scale(1) perspective(600px) rotateX(0deg);
   }
 
   70% {
     opacity: 1;
-    transform: scale(1);
+    transform: translateY(0px) scale(1) perspective(600px) rotateX(0deg);
   }
 
   100% {
     opacity: 0;
-    transform: scale(1.05);
+    transform: translateY(-10px) scale(1.04) perspective(600px) rotateX(-5deg);
   }
 }
 

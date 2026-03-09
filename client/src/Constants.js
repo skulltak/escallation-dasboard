@@ -11,6 +11,8 @@ export const HEADER_MAP = {
     "branch": "branch", "location": "branch", "branch / location": "branch", "store": "branch", "hub": "branch", "branch name": "branch", "store name": "branch", "hub name": "branch",
     // Brand
     "brand": "brand", "model": "brand", "brand / model": "brand", "product": "brand", "make": "brand", "brand name": "brand",
+    // ESC Date
+    "esc date": "escDate", "escalation date": "escDate", "esc_date": "escDate", "escalation_date": "escDate",
     // Reason
     "reason": "reason", "issue": "reason", "primary issue": "reason", "complaint": "reason", "problem": "reason", "issue description": "reason",
     // City

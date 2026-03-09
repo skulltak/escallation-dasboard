@@ -191,6 +191,7 @@ const App = () => {
     id: '',
     branch: '',
     brand: '',
+    escDate: '',
     serviceType: '',
     reason: '',
     city: '',
@@ -432,6 +433,7 @@ const App = () => {
       id: '',
       branch: user?.role !== 'ADMIN' ? user.role : '',
       brand: '',
+      escDate: '',
       serviceType: '',
       reason: '',
       city: '',
@@ -593,8 +595,8 @@ const App = () => {
 
   const handleExport = () => {
     if (!filteredData.length) return showToast("No data to export");
-    const columns = ["date", "id", "branch", "brand", "reason", "city", "aging", "status", "remark"];
-    const headers = ["Date", "ID", "Branch", "Brand", "Reason", "City", "Aging", "Status", "Remark"];
+    const columns = ["date", "escDate", "id", "branch", "brand", "reason", "city", "aging", "status", "remark"];
+    const headers = ["Date", "ESC Date", "ID", "Branch", "Brand", "Reason", "City", "Aging", "Status", "Remark"];
 
     let csv = headers.join(",") + "\n";
     filteredData.forEach(row => {
@@ -1151,6 +1153,7 @@ const App = () => {
                       <thead>
                         <tr>
                           <th>Date</th>
+                          <th>ESC Date</th>
                           <th>Branch</th>
                           <th>Aging</th>
                           <th>Brand</th>
@@ -1165,6 +1168,7 @@ const App = () => {
                         {filteredData.map(row => (
                           <tr key={row._id}>
                             <td>{formatDisplayDate(row.date)}</td>
+                            <td>{formatDisplayDate(row.escDate)}</td>
                             <td>{row.branch}</td>
                             <td>
                               <span className={`badge ${row.aging > 10 ? 'badge-danger' : row.aging > 5 ? 'badge-warning' : 'badge-success'}`}>
@@ -1264,6 +1268,10 @@ const App = () => {
                   <input type="date" required className="form-control" value={formData.date} onChange={(e) => setFormData({ ...formData, date: e.target.value })} />
                 </div>
                 <div className="form-group">
+                  <label>ESC Date (Escalation Date)</label>
+                  <input type="date" className="form-control" value={formData.escDate} onChange={(e) => setFormData({ ...formData, escDate: e.target.value })} />
+                </div>
+                <div className="form-group">
                   <label>Branch</label>
                   <select
                     className="form-control"
@@ -1351,6 +1359,7 @@ const App = () => {
                 <thead>
                   <tr>
                     <th>Date</th>
+                    <th>ESC Date</th>
                     <th>Brand</th>
                     <th>ID</th>
                     <th>Action</th>
@@ -1360,6 +1369,7 @@ const App = () => {
                   {selectedAgingCases.map(row => (
                     <tr key={row._id}>
                       <td>{formatDisplayDate(row.date)}</td>
+                      <td>{formatDisplayDate(row.escDate)}</td>
                       <td>{row.brand}</td>
                       <td>{row.id}</td>
                       <td>

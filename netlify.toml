@@ -1,0 +1,16 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+  functions = "functions"
+
+# This redirect ensures all /api/* calls go to our Netlify Function (api.js)
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api"
+  status = 200
+
+# This redirect ensures the React SPA handles routing for all other requests
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

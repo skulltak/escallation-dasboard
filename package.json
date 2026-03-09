@@ -4,7 +4,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "build": "npm install --prefix client --legacy-peer-deps && npm run build --prefix client",
+    "build": "npm install --prefix client --legacy-peer-deps && npm run build --prefix client && mkdir -p dist && cp -r client/dist/* dist/",
     "dev": "nodemon server.js"
   },
   "keywords": [],
@@ -15,7 +15,8 @@
     "cors": "^2.8.6",
     "dotenv": "^17.2.4",
     "express": "^5.2.1",
-    "mongoose": "^9.2.1"
+    "mongoose": "^9.2.1",
+    "serverless-http": "^4.0.0"
   },
   "engines": {
     "node": ">=22.12.0"

@@ -122,26 +122,23 @@ app.use((req, res, next) => {
 
 // Database Connection & Server Start
 const startServer = async () => {
-    // Start listening immediately
-    app.listen(PORT, '0.0.0.0', () => {
-        console.log(`🚀 Escalation Dashboard v4.9.1 - Live on port ${PORT}`);
-    });
-
     try {
         console.log('Connecting to MongoDB...');
-        // Check for MONGO_URL (Render default) or MONGO_URI
         const uri = process.env.MONGO_URL || process.env.MONGO_URI;
-        console.log("Checking Mongo URI:", uri ? "Defined (Hidden for safety)" : "UNDEFINED");
-
-        if (!uri) {
-            throw new Error("MONGO_URL and MONGO_URI are both undefined");
-        }
-
+        if (!uri) throw new Error("MONGO_URL and MONGO_URI are both undefined");
         await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 });
         console.log('✅ MongoDB Connected');
     } catch (err) {
-        console.error('❌ MongoDB Connection Error within timeout:', err.message);
+        console.error('❌ MongoDB Connection Error:', err.message);
+    }
+
+    if (require.main === module) {
+        app.listen(PORT, '0.0.0.0', () => {
+            console.log(`🚀 Escalation Dashboard v4.9.1 - Live on port ${PORT}`);
+        });
     }
 };
 
 startServer();
+
+module.exports = app;

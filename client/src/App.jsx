@@ -1252,6 +1252,7 @@ const App = () => {
                   <select
                     className="form-control"
                     required
+                    disabled={user?.role !== 'ADMIN'}
                     value={formData.brand}
                     onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
                   >

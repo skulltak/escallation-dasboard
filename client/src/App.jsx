@@ -139,6 +139,14 @@ const ParticleBackground = () => {
   );
 };
 
+const AppleWelcome = () => {
+  return (
+    <div className="apple-welcome-overlay">
+      <div className="apple-welcome-text">hello</div>
+    </div>
+  );
+};
+
 const App = () => {
   const [user, setUser] = useState(null);
   const [data, setData] = useState([]);
@@ -161,6 +169,7 @@ const App = () => {
   const [selectedAging, setSelectedAging] = useState(null);
   const [agingDetailModalOpen, setAgingDetailModalOpen] = useState(false);
   const [hasShownAgingPopup, setHasShownAgingPopup] = useState(false);
+  const [showAppleWelcome, setShowAppleWelcome] = useState(false);
   const agingChartRef = React.useRef(null);
 
   const deferredFilters = useDeferredValue(filters);
@@ -356,6 +365,9 @@ const App = () => {
         if (newUser.role !== 'ADMIN') {
           setFilters(prev => ({ ...prev, branch: newUser.role }));
           setFormData(prev => ({ ...prev, branch: newUser.role }));
+          // Apple welcome effect for branch
+          setShowAppleWelcome(true);
+          setTimeout(() => setShowAppleWelcome(false), 3000);
         }
       } else {
         setLoginError('Invalid Username/Branch ID');
@@ -850,6 +862,9 @@ const App = () => {
 
   return (
     <div className="app-container">
+      {/* Apple Welcome Overlay */}
+      {showAppleWelcome && <AppleWelcome />}
+
       {/* Toast Container */}
       <div className="toast-container">
         {toasts.map(t => (

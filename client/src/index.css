@@ -912,3 +912,59 @@ tr:hover td {
 .chart-scroll-container::-webkit-scrollbar-thumb:hover {
   background: var(--primary-hover);
 }
+
+/* Apple Welcome Overlay */
+.apple-welcome-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: #000;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeOutOverlay 0.8s ease-in-out forwards;
+  animation-delay: 2.2s;
+  /* Start fading out background after 2.2s */
+}
+
+.apple-welcome-text {
+  color: #fff;
+  font-size: 3rem;
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  opacity: 0;
+  animation: fadeInOutText 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes fadeInOutText {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  30% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  70% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes fadeOutOverlay {
+  0% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}

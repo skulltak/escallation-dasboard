@@ -122,6 +122,11 @@ app.use((req, res, next) => {
 
 // Database Connection & Server Start
 const startServer = async () => {
+    // Start listening immediately
+    app.listen(PORT, '0.0.0.0', () => {
+        console.log(`🚀 Escalation Dashboard v4.9.1 - Live on port ${PORT}`);
+    });
+
     try {
         console.log('Connecting to MongoDB...');
         // Check for MONGO_URL (Render default) or MONGO_URI
@@ -132,17 +137,10 @@ const startServer = async () => {
             throw new Error("MONGO_URL and MONGO_URI are both undefined");
         }
 
-        await mongoose.connect(uri);
+        await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 });
         console.log('✅ MongoDB Connected');
-
-        app.listen(PORT, '0.0.0.0', () => {
-            console.log(`🚀 Escalation Dashboard v4.9.1 - 3D PRO Live on port ${PORT}`);
-        });
     } catch (err) {
-        console.error('❌ MongoDB Connection Error:', err.message);
-        app.listen(PORT, '0.0.0.0', () => {
-            console.log(`🚀 Server running on port ${PORT} (v4.9.1 - DB Offline)`);
-        });
+        console.error('❌ MongoDB Connection Error within timeout:', err.message);
     }
 };
 

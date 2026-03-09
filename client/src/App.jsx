@@ -250,7 +250,13 @@ const App = () => {
     let result = data;
     if (user && user.role !== 'ADMIN') {
       const uRole = String(user.role).trim().toLowerCase();
-      result = result.filter(d => String(d.branch || "").trim().toLowerCase() === uRole);
+      result = result.filter(d => {
+        const dBranch = String(d.branch || "").trim().toLowerCase();
+        if (uRole === 'bangalore') {
+          return dBranch === 'bangalore' || dBranch === 'ro kar';
+        }
+        return dBranch === uRole;
+      });
     }
 
     return result.filter(d => {
@@ -486,7 +492,15 @@ const App = () => {
 
           if (!hasData) continue;
           if (!entry.date || !entry.id || !entry.branch) continue;
-          if (user.role !== "ADMIN" && String(entry.branch).toLowerCase() !== String(user.role).toLowerCase()) continue;
+          if (user.role !== "ADMIN") {
+            const uRole = String(user.role).toLowerCase();
+            const eBranch = String(entry.branch).toLowerCase();
+            if (uRole === 'bangalore') {
+              if (eBranch !== 'bangalore' && eBranch !== 'ro kar') continue;
+            } else if (eBranch !== uRole) {
+              continue;
+            }
+          }
 
           // Normalize branch name if it matches a known branch in any case
           let canonicalBranch = BRANCHES.find(b => b.toLowerCase() === String(entry.branch).toLowerCase());
@@ -583,7 +597,14 @@ const App = () => {
   // Report Logic
   const reportData = useMemo(() => {
     if (!Array.isArray(data)) return [];
-    const relevant = user?.role === "ADMIN" ? data : data.filter(d => String(d.branch || "").toLowerCase() === String(user?.role || "").toLowerCase());
+    const relevant = user?.role === "ADMIN" ? data : data.filter(d => {
+      const uRole = String(user?.role || "").toLowerCase();
+      const dBranch = String(d.branch || "").toLowerCase();
+      if (uRole === 'bangalore') {
+        return dBranch === 'bangalore' || dBranch === 'ro kar';
+      }
+      return dBranch === uRole;
+    });
     const filtered = deferredFilters.date ? relevant.filter(d => {
       if (!d || !d.date) return false;
       const dbDateStr = String(d.date).trim();
@@ -612,7 +633,15 @@ const App = () => {
     const stats = {};
     const branchList = Array.isArray(BRANCHES) ? BRANCHES : [];
     branchList.forEach(b => {
-      if (user?.role && user.role !== "ADMIN" && b.toLowerCase() !== String(user.role).toLowerCase()) return;
+      if (user?.role && user.role !== "ADMIN") {
+        const uRole = String(user.role).toLowerCase();
+        const bLower = b.toLowerCase();
+        if (uRole === 'bangalore') {
+          if (bLower !== 'bangalore' && bLower !== 'ro kar') return;
+        } else if (bLower !== uRole) {
+          return;
+        }
+      }
       stats[b] = { total: 0, open: 0, closed: 0, totalAging: 0 };
     });
 
@@ -1005,10 +1034,16 @@ const App = () => {
                         value={filters.date}
                         onChange={(e) => setFilters({ ...filters, date: e.target.value })}
                       />
-                      {user.role === 'ADMIN' && (
+                      {(user.role === 'ADMIN' || (user.role && String(user.role).toLowerCase() === 'bangalore')) && (
                         <select className="btn-sm" value={filters.branch} onChange={(e) => setFilters({ ...filters, branch: e.target.value })}>
                           <option value="">All Branches</option>
-                          {BRANCHES.map(b => <option key={b}>{b}</option>)}
+                          {BRANCHES.map(b => {
+                            if (user.role !== 'ADMIN' && String(user.role).toLowerCase() === 'bangalore') {
+                              const bLower = b.toLowerCase();
+                              if (bLower !== 'bangalore' && bLower !== 'ro kar') return null;
+                            }
+                            return <option key={b}>{b}</option>;
+                          })}
                         </select>
                       )}
                       <select className="btn-sm" value={filters.status} onChange={(e) => setFilters({ ...filters, status: e.target.value })}>
@@ -1173,12 +1208,18 @@ const App = () => {
                   <select
                     className="form-control"
                     required
-                    disabled={user.role !== 'ADMIN'}
+                    disabled={user.role !== 'ADMIN' && String(user.role || '').toLowerCase() !== 'bangalore'}
                     value={formData.branch}
                     onChange={(e) => setFormData({ ...formData, branch: e.target.value })}
                   >
                     <option value="">Select Branch</option>
-                    {BRANCHES.map(b => <option key={b}>{b}</option>)}
+                    {BRANCHES.map(b => {
+                      if (user.role !== 'ADMIN' && String(user.role || '').toLowerCase() === 'bangalore') {
+                        const bLower = b.toLowerCase();
+                        if (bLower !== 'bangalore' && bLower !== 'ro kar') return null;
+                      }
+                      return <option key={b}>{b}</option>;
+                    })}
                   </select>
                 </div>
                 <div className="form-group">

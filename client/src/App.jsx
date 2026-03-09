@@ -713,6 +713,13 @@ const App = () => {
     });
 
     const range = Array.from({ length: maxAging + 1 }, (_, i) => i);
+    range.sort((a, b) => {
+      const aIsRed = a > 5;
+      const bIsRed = b > 5;
+      if (aIsRed && !bIsRed) return -1;
+      if (!aIsRed && bIsRed) return 1;
+      return a - b;
+    });
 
     return {
       labels: range.map(a => `${a} Days`),

@@ -160,6 +160,7 @@ const App = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [selectedAging, setSelectedAging] = useState(null);
   const [agingDetailModalOpen, setAgingDetailModalOpen] = useState(false);
+  const [hasShownAgingPopup, setHasShownAgingPopup] = useState(false);
   const agingChartRef = React.useRef(null);
 
   const deferredFilters = useDeferredValue(filters);
@@ -310,6 +311,22 @@ const App = () => {
       Number(d.aging || 0) === selectedAging
     );
   }, [filteredData, selectedAging]);
+
+  // Aging Reminder Popup
+  useEffect(() => {
+    if (user && !hasShownAgingPopup && filteredData.length > 0) {
+      const agingCount = filteredData.filter(d =>
+        String(d.status || '').toLowerCase() !== 'closed' &&
+        String(d.status || '').toLowerCase() !== 'cancelled' &&
+        Number(d.aging || 0) > 5
+      ).length;
+
+      if (agingCount > 0) {
+        showToast(`Reminder: You have ${agingCount} cases with aging over 5 days!`, 'error');
+        setHasShownAgingPopup(true);
+      }
+    }
+  }, [user, filteredData, hasShownAgingPopup]);
 
   // Auth Handlers
   const handleLogin = (e) => {
@@ -980,7 +997,8 @@ const App = () => {
                               callbacks: {
                                 label: (context) => `Cases: ${context.raw}`
                               }
-                            }
+                            },
+                            glowPlugin: {}
                           },
                           scales: {
                             y: {
@@ -998,7 +1016,7 @@ const App = () => {
                               }
                             }
                           }
-                        }} />
+                        }} plugins={[glowPlugin]} />
                     </div>
                   </div>
                 </div>
@@ -1025,7 +1043,9 @@ const App = () => {
                   <div className="table-header">
                     <div className="flex items-center gap-4">
                       <h3 className="font-bold">Recent Escalations</h3>
-                      <button className="btn-sm btn-primary-sm" onClick={() => setModalOpen(true)}><Plus size={16} /> New Case</button>
+                      {user?.role === 'ADMIN' && (
+                        <button className="btn-sm btn-primary-sm" onClick={() => setModalOpen(true)}><Plus size={16} /> New Case</button>
+                      )}
                     </div>
                     <div className="action-group">
                       <input

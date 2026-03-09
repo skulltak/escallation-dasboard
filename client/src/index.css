@@ -917,61 +917,112 @@ tr:hover td {
 .apple-welcome-overlay {
   position: fixed;
   inset: 0;
-  background: radial-gradient(ellipse at center, #0d0d0d 0%, #000 100%);
   z-index: 9999;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+  background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 30%, #cbebff 70%, #bae6fd 100%);
   animation: fadeOutOverlay 1s ease-in-out forwards;
-  animation-delay: 2.5s;
+  animation-delay: 2.8s;
 }
 
-.apple-welcome-text {
-  font-family: 'Playfair Display', Georgia, serif;
-  font-style: italic;
-  font-weight: 700;
-  font-size: 5.5rem;
-  color: #fff;
+/* Animated background blobs inside overlay */
+.apple-welcome-overlay::before {
+  content: '';
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.3) 0%, transparent 70%);
+  top: -100px;
+  left: -100px;
+  animation: welcomeBlobFloat 6s ease-in-out infinite alternate;
+  filter: blur(40px);
+}
+
+.apple-welcome-overlay::after {
+  content: '';
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.25) 0%, transparent 70%);
+  bottom: -80px;
+  right: -80px;
+  animation: welcomeBlobFloat 8s ease-in-out infinite alternate-reverse;
+  filter: blur(50px);
+}
+
+@keyframes welcomeBlobFloat {
+  from {
+    transform: translate(0, 0) scale(1);
+  }
+
+  to {
+    transform: translate(40px, 30px) scale(1.15);
+  }
+}
+
+.apple-welcome-card {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 2rem;
+  padding: 3rem 4.5rem;
+  box-shadow: 0 20px 60px -10px rgba(99, 102, 241, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.3);
+  animation: welcomeCardIn 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   opacity: 0;
-  letter-spacing: 0.02em;
-  /* Layered 3D text shadow */
-  text-shadow:
-    0 1px 0 #cccccc,
-    0 2px 0 #b3b3b3,
-    0 3px 0 #999,
-    0 4px 0 #888,
-    0 5px 0 #777,
-    0 6px 1px rgba(0, 0, 0, .1),
-    0 0 5px rgba(0, 0, 0, .1),
-    0 1px 3px rgba(0, 0, 0, .3),
-    0 3px 5px rgba(0, 0, 0, .2),
-    0 5px 10px rgba(0, 0, 0, .25),
-    0 10px 10px rgba(0, 0, 0, .2),
-    0 20px 20px rgba(0, 0, 0, .15);
-  animation: fadeInOutText 2.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-@keyframes fadeInOutText {
+@keyframes welcomeCardIn {
   0% {
     opacity: 0;
-    transform: translateY(20px) scale(0.9) perspective(600px) rotateX(15deg);
-  }
-
-  25% {
-    opacity: 1;
-    transform: translateY(0px) scale(1) perspective(600px) rotateX(0deg);
-  }
-
-  70% {
-    opacity: 1;
-    transform: translateY(0px) scale(1) perspective(600px) rotateX(0deg);
+    transform: translateY(30px) scale(0.96);
   }
 
   100% {
-    opacity: 0;
-    transform: translateY(-10px) scale(1.04) perspective(600px) rotateX(-5deg);
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
+}
+
+.apple-welcome-text {
+  font-family: 'Inter', sans-serif;
+  font-weight: 800;
+  font-size: 3.2rem;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 40%, #818cf8 70%, #a5b4fc 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-align: center;
+}
+
+.apple-welcome-sub {
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #64748b;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.apple-welcome-divider {
+  width: 48px;
+  height: 3px;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #6366f1, #818cf8);
+  margin: 0.25rem 0;
 }
 
 @keyframes fadeOutOverlay {

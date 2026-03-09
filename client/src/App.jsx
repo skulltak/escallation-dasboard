@@ -149,7 +149,11 @@ const getTimeGreeting = () => {
 const AppleWelcome = ({ text }) => {
   return (
     <div className="apple-welcome-overlay">
-      <div className="apple-welcome-text">{text}</div>
+      <div className="apple-welcome-card">
+        <div className="apple-welcome-text">{text}</div>
+        <div className="apple-welcome-divider" />
+        <div className="apple-welcome-sub">VE CARE Escalation Dashboard</div>
+      </div>
     </div>
   );
 };
@@ -373,7 +377,7 @@ const App = () => {
         // Compute greeting text
         const timeGreeting = getTimeGreeting();
         const greeting = newUser.role === 'ADMIN'
-          ? timeGreeting
+          ? `${timeGreeting}, Admin`
           : `${timeGreeting}, ${newUser.role}`;
         setWelcomeText(greeting);
         // Apple welcome effect for all users

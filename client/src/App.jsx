@@ -1101,10 +1101,12 @@ const App = () => {
                         value={filters.aging}
                         onChange={(e) => setFilters({ ...filters, aging: e.target.value })}
                       />
-                      <label className="btn-sm flex items-center gap-2">
-                        <FileUp size={16} /> Import
-                        <input type="file" className="hidden" accept=".csv, .xlsx, .xls" onChange={handleImport} />
-                      </label>
+                      {user?.role === 'ADMIN' && (
+                        <label className="btn-sm flex items-center gap-2">
+                          <FileUp size={16} /> Import
+                          <input type="file" className="hidden" accept=".csv, .xlsx, .xls" onChange={handleImport} />
+                        </label>
+                      )}
                       <button className="btn-sm flex items-center gap-2" onClick={handleExport}><FileDown size={16} /> Export</button>
                       {user.role === 'ADMIN' && (
                         <button className="btn-sm flex items-center gap-2" style={{ color: 'var(--danger)' }} onClick={handleClearAll}><Trash2 size={16} /> Clear</button>

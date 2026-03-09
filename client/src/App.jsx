@@ -139,10 +139,17 @@ const ParticleBackground = () => {
   );
 };
 
-const AppleWelcome = () => {
+const getTimeGreeting = () => {
+  const h = new Date().getHours();
+  if (h >= 5 && h < 12) return 'Good Morning';
+  if (h >= 12 && h < 17) return 'Good Afternoon';
+  return 'Good Evening';
+};
+
+const AppleWelcome = ({ text }) => {
   return (
     <div className="apple-welcome-overlay">
-      <div className="apple-welcome-text">hello</div>
+      <div className="apple-welcome-text">{text}</div>
     </div>
   );
 };
@@ -170,6 +177,7 @@ const App = () => {
   const [agingDetailModalOpen, setAgingDetailModalOpen] = useState(false);
   const [hasShownAgingPopup, setHasShownAgingPopup] = useState(false);
   const [showAppleWelcome, setShowAppleWelcome] = useState(false);
+  const [welcomeText, setWelcomeText] = useState('');
   const agingChartRef = React.useRef(null);
 
   const deferredFilters = useDeferredValue(filters);
@@ -362,6 +370,12 @@ const App = () => {
         };
         setUser(newUser);
         sessionStorage.setItem('appUser', JSON.stringify(newUser));
+        // Compute greeting text
+        const timeGreeting = getTimeGreeting();
+        const greeting = newUser.role === 'ADMIN'
+          ? timeGreeting
+          : `${timeGreeting}, ${newUser.role}`;
+        setWelcomeText(greeting);
         // Apple welcome effect for all users
         setShowAppleWelcome(true);
         setTimeout(() => setShowAppleWelcome(false), 3500);
@@ -863,7 +877,7 @@ const App = () => {
   return (
     <div className="app-container">
       {/* Apple Welcome Overlay */}
-      {showAppleWelcome && <AppleWelcome />}
+      {showAppleWelcome && <AppleWelcome text={welcomeText} />}
 
       {/* Toast Container */}
       <div className="toast-container">

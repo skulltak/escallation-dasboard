@@ -704,15 +704,13 @@ const App = () => {
       String(d.status || '').toLowerCase() !== 'cancelled'
     );
 
-    const maxAgingRaw = activeData.reduce((max, d) => Math.max(max, Number(d.aging || 0)), 0);
-    const maxAging = Math.min(maxAgingRaw, 100); // Cap at 100 to prevent crash if data is bad
     const counts = {};
     activeData.forEach(d => {
       const aging = Number(d.aging || 0);
       counts[aging] = (counts[aging] || 0) + 1;
     });
 
-    const range = Array.from({ length: maxAging + 1 }, (_, i) => i);
+    const range = Object.keys(counts).map(Number);
     range.sort((a, b) => {
       const aIsRed = a > 5;
       const bIsRed = b > 5;
@@ -725,7 +723,7 @@ const App = () => {
       labels: range.map(a => `${a} Days`),
       datasets: [{
         label: 'Number of Cases',
-        data: range.map(a => counts[a] || 0),
+        data: range.map(a => counts[a]),
         backgroundColor: range.map(a => a > 5 ? '#ef4444' : '#6366f1'),
         borderRadius: 4
       }]

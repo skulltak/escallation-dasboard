@@ -170,6 +170,7 @@ const App = () => {
   const [filters, setFilters] = useState({
     search: '',
     date: '',
+    escDate: '',
     branch: '',
     status: '',
     aging: '',
@@ -317,11 +318,28 @@ const App = () => {
         return false;
       })();
 
+      const matchesEscDate = deferredFilters.escDate === "" || (() => {
+        if (!d.escDate) return false;
+        const dbDateStr = String(d.escDate).trim();
+        const searchDate = deferredFilters.escDate;
+        const dbParts = dbDateStr.split('-');
+        if (dbParts.length !== 3) return dbDateStr.includes(searchDate);
+        let y, dPart, mPart;
+        if (dbParts[0].length === 4) { [y, mPart, dPart] = dbParts; }
+        else { [dPart, mPart, y] = dbParts; }
+        const yS = String(y);
+        const mS = String(mPart).padStart(2, '0');
+        const dS = String(dPart).padStart(2, '0');
+        if (`${yS}-${mS}-${dS}` === searchDate) return true;
+        if (`${yS}-${dS}-${mS}` === searchDate) return true;
+        return false;
+      })();
+
       const matchesAging = deferredFilters.aging === "" || String(d.aging || 0) === deferredFilters.aging;
       const matchesBrand = deferredFilters.brand === "" || String(d.brand || "").toLowerCase().includes(String(deferredFilters.brand).toLowerCase());
       const matchesServiceType = deferredFilters.serviceType === "" || String(d.serviceType || "").toLowerCase() === String(deferredFilters.serviceType).toLowerCase();
 
-      return matchesSearch && matchesStatus && matchesBranch && matchesDate && matchesAging && matchesBrand && matchesServiceType;
+      return matchesSearch && matchesStatus && matchesBranch && matchesDate && matchesEscDate && matchesAging && matchesBrand && matchesServiceType;
     });
   }, [data, deferredFilters, user]);
 
@@ -1106,6 +1124,24 @@ const App = () => {
                           })}
                         </select>
                       )}
+                      <div className="flex flex-col gap-0.5">
+                        <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', marginLeft: '4px' }}>Log Date</span>
+                        <input
+                          type="date"
+                          className="btn-sm"
+                          value={filters.date}
+                          onChange={(e) => setFilters({ ...filters, date: e.target.value })}
+                        />
+                      </div>
+                      <div className="flex flex-col gap-0.5">
+                        <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', marginLeft: '4px' }}>ESC Date</span>
+                        <input
+                          type="date"
+                          className="btn-sm"
+                          value={filters.escDate}
+                          onChange={(e) => setFilters({ ...filters, escDate: e.target.value })}
+                        />
+                      </div>
                       <select className="btn-sm" value={filters.status} onChange={(e) => setFilters({ ...filters, status: e.target.value })}>
                         <option value="">All Status</option>
                         <option>Open</option>

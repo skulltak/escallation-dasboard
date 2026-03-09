@@ -149,7 +149,7 @@ const getTimeGreeting = () => {
 const AppleWelcome = ({ text }) => {
   return (
     <div className="apple-welcome-overlay">
-      <div className="apple-welcome-card">
+      <div className="apple-welcome-content">
         <div className="apple-welcome-text">{text}</div>
         <div className="apple-welcome-divider" />
         <div className="apple-welcome-sub">VE CARE Escalation Dashboard</div>

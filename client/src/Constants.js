@@ -4,11 +4,11 @@ export const BRANDS = ["VW", "SPPL", "VIDEOCON", "AMAZON", "NIPPO", "LEDVANCE", 
 
 export const HEADER_MAP = {
     // Date
-    "date": "date", "date logged": "date", "logged date": "date", "entry date": "date", "date of entry": "date", "case date": "date", "created date": "date", "escalation": "date",
+    "date": "date", "date logged": "date", "logged date": "date", "entry date": "date", "date of entry": "date", "case date": "date", "created date": "date", "escalation": "date", "escallation": "date", "escalltion": "date",
     // ID
-    "id": "id", "reference id": "id", "case id": "id", "reference no": "id", "ref id": "id", "ticket id": "id", "case #": "id", "reference #": "id", "service order id": "id",
+    "id": "id", "reference id": "id", "case id": "id", "reference no": "id", "ref id": "id", "ticket id": "id", "case #": "id", "reference #": "id", "service order id": "id", "sirus id": "id", "escalation id": "id",
     // Branch
-    "branch": "branch", "location": "branch", "branch / location": "branch", "store": "branch", "hub": "branch", "branch name": "branch", "store name": "branch", "hub name": "branch", "state": "branch",
+    "branch": "branch", "location": "branch", "branch / location": "branch", "store": "branch", "hub": "branch", "branch name": "branch", "store name": "branch", "hub name": "branch", "state": "branch", "region": "branch",
     // Brand
     "brand": "brand", "model": "brand", "brand / model": "brand", "product": "brand", "make": "brand", "brand name": "brand",
     // Closed Date

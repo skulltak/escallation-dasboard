@@ -547,7 +547,11 @@ const App = () => {
         if (rows.length < 2) throw new Error("File empty or invalid format");
 
         const fileHeaders = rows[0].map(h => String(h || "").trim().toLowerCase());
-        const isSirus = fileHeaders.includes('job status') || fileHeaders.includes('escalation id');
+        const sirusHeaders = ['job status', 'escalation id', 'escallation', 'escalltion', 'service order id', 'sirus id'];
+        const isSirus = fileHeaders.some(h => sirusHeaders.includes(h));
+        
+        console.log("Import Headers:", fileHeaders);
+        console.log("Is SIRUS File:", isSirus);
         
         const colMap = {};
         fileHeaders.forEach((h, idx) => {
@@ -582,7 +586,19 @@ const App = () => {
           });
 
           if (!hasData) continue;
-          if (!entry.date || !entry.id || !entry.branch) continue;
+          
+          if (!entry.date || !entry.id || !entry.branch) {
+            console.warn("Skipping Row (Missing required fields):", {
+              row: i + 1,
+              date: entry.date,
+              id: entry.id,
+              branch: entry.branch,
+              hasMappedDate: !!colMap['date'],
+              hasMappedId: !!colMap['id'],
+              hasMappedBranch: !!colMap['branch']
+            });
+            continue;
+          }
 
           // --- SIRUS Specific Logic ---
           if (isSirus) {

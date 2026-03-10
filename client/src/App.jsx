@@ -546,11 +546,32 @@ const App = () => {
 
         if (rows.length < 2) throw new Error("File empty or invalid format");
 
-        const fileHeaders = rows[0].map(h => String(h || "").trim().toLowerCase());
-        const sirusHeaders = ['job status', 'escalation id', 'escallation', 'escalltion', 'service order id', 'sirus id'];
-        const isSirus = fileHeaders.some(h => sirusHeaders.includes(h));
-        
-        console.log("Import Headers:", fileHeaders);
+        // Smart Header Search: Find the first row that has at least 3 recognizable headers
+        let headerRowIndex = -1;
+        let fileHeaders = [];
+        const sirusIndicators = ['job status', 'escalation id', 'escallation', 'escalltion', 'service order id', 'sirus id'];
+
+        for (let i = 0; i < Math.min(rows.length, 20); i++) {
+          const row = rows[i];
+          if (!Array.isArray(row)) continue;
+          const candidateHeaders = row.map(h => String(h || "").trim().toLowerCase());
+          const matchCount = candidateHeaders.filter(h => !!HEADER_MAP[h]).length;
+          
+          if (matchCount >= 3) {
+            headerRowIndex = i;
+            fileHeaders = candidateHeaders;
+            break;
+          }
+        }
+
+        if (headerRowIndex === -1) {
+          console.warn("No clear header row found. Falling back to Row 0.");
+          headerRowIndex = 0;
+          fileHeaders = rows[0].map(h => String(h || "").trim().toLowerCase());
+        }
+
+        const isSirus = fileHeaders.some(h => sirusIndicators.includes(h));
+        console.log(`Detected header at Row ${headerRowIndex}:`, fileHeaders);
         console.log("Is SIRUS File:", isSirus);
         
         const colMap = {};
@@ -559,7 +580,7 @@ const App = () => {
         });
 
         const entries = [];
-        for (let i = 1; i < rows.length; i++) {
+        for (let i = headerRowIndex + 1; i < rows.length; i++) {
           const row = rows[i];
           if (!row || row.length === 0) continue;
 

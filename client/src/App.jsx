@@ -261,12 +261,12 @@ const App = () => {
 
   // Toast System
   const [toasts, setToasts] = useState([]);
-  const showToast = (msg, type = 'info') => {
+  const showToast = (msg, type = 'info', duration = 3000) => {
     const fresh = { id: Date.now(), msg, type };
     setToasts(prev => [...prev, fresh]);
     setTimeout(() => {
       setToasts(prev => prev.filter(t => t.id !== fresh.id));
-    }, 3000);
+    }, duration);
   };
 
   // Helper: Filtered Data
@@ -587,11 +587,27 @@ const App = () => {
         }
 
         if (entries.length) {
+          // --- Duplicate Detection Logic ---
+          const existingIds = new Set(data.map(d => String(d.id).trim()));
+          const filteredEntries = entries.filter(e => !existingIds.has(String(e.id).trim()));
+          const skippedCount = entries.length - filteredEntries.length;
+
+          if (skippedCount > 0) {
+            showToast(`Duplicate IDs ignored: ${skippedCount} records already exists.`, 'warning', 7000);
+          }
+
+          if (filteredEntries.length === 0) {
+            if (skippedCount > 0) return; // Already showed duplicate warning
+            showToast("No new records found in file.", "info");
+            return;
+          }
+          // ---------------------------------
+
           setImporting(true);
-          showToast(`Importing ${entries.length} cases...`, 'info');
+          showToast(`Importing ${filteredEntries.length} new cases...`, 'info');
           try {
-            await axios.post(`${API_URL}/bulk`, entries);
-            showToast(`Successfully imported ${entries.length} records`, 'success');
+            await axios.post(`${API_URL}/bulk`, filteredEntries);
+            showToast(`Successfully imported ${filteredEntries.length} records`, 'success');
             loadData();
           } catch (err) {
             console.error("Bulk upload error:", err);

@@ -690,9 +690,10 @@ p {
 
 .sidebar-open .charts-grid > :nth-child(3) {
   grid-column: 1 / -1;
-  width: 80%;
+  width: 65%;
   margin: 0 auto;
   box-sizing: border-box;
+  height: 260px;
 }
 
 .chart-card {

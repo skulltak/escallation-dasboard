@@ -4,11 +4,11 @@ export const BRANDS = ["VW", "SPPL", "VIDEOCON", "AMAZON", "NIPPO", "LEDVANCE", 
 
 export const HEADER_MAP = {
     // Date
-    "date": "date", "date logged": "date", "logged date": "date", "entry date": "date", "date of entry": "date", "case date": "date", "created date": "date",
+    "date": "date", "date logged": "date", "logged date": "date", "entry date": "date", "date of entry": "date", "case date": "date", "created date": "date", "escalation": "date",
     // ID
-    "id": "id", "reference id": "id", "case id": "id", "reference no": "id", "ref id": "id", "ticket id": "id", "case #": "id", "reference #": "id",
+    "id": "id", "reference id": "id", "case id": "id", "reference no": "id", "ref id": "id", "ticket id": "id", "case #": "id", "reference #": "id", "service order id": "id",
     // Branch
-    "branch": "branch", "location": "branch", "branch / location": "branch", "store": "branch", "hub": "branch", "branch name": "branch", "store name": "branch", "hub name": "branch",
+    "branch": "branch", "location": "branch", "branch / location": "branch", "store": "branch", "hub": "branch", "branch name": "branch", "store name": "branch", "hub name": "branch", "state": "branch",
     // Brand
     "brand": "brand", "model": "brand", "brand / model": "brand", "product": "brand", "make": "brand", "brand name": "brand",
     // Closed Date
@@ -18,13 +18,15 @@ export const HEADER_MAP = {
     // City
     "city": "city", "region": "city", "district": "city", "town": "city", "branch city": "city",
     // Aging
-    "aging": "aging", "aging (days)": "aging", "days": "aging", "pending days": "aging", "age": "aging",
+    "aging": "aging", "aging (days)": "aging", "days": "aging", "pending days": "aging", "age": "aging", "ageing": "aging",
     // Status
-    "status": "status", "current status": "status", "case status": "status", "resolution": "status",
+    "status": "status", "current status": "status", "case status": "status", "resolution": "status", "job status": "status",
     // Remark
     "remark": "remark", "remarks": "remark", "technician remarks": "remark", "note": "remark", "comments": "remark", "final remark": "remark",
     // Service Type
-    "service type": "serviceType", "type of service": "serviceType", "service": "serviceType", "service_type": "serviceType"
+    "service type": "serviceType", "type of service": "serviceType", "service": "serviceType", "service_type": "serviceType",
+    // Special
+    "date (dd-mm-yy)": "receiptDate"
 };
 
 export const API_URL = '/api/escalations';

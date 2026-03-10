@@ -531,6 +531,8 @@ const App = () => {
         if (rows.length < 2) throw new Error("File empty or invalid format");
 
         const fileHeaders = rows[0].map(h => String(h || "").trim().toLowerCase());
+        const isSirus = fileHeaders.includes('job status') || fileHeaders.includes('escalation id');
+        
         const colMap = {};
         fileHeaders.forEach((h, idx) => {
           if (HEADER_MAP[h]) colMap[HEADER_MAP[h]] = idx;
@@ -548,11 +550,10 @@ const App = () => {
             const idx = colMap[key];
             let val = row[idx];
 
-            if (key === 'date') {
+            if (key === 'date' || key === 'receiptDate') {
               if (val instanceof Date) {
                 entry[key] = val.toISOString().split('T')[0];
               } else if (typeof val === 'number') {
-                // Handle Excel serial numeric dates if cellDates failed
                 entry[key] = XLSX.utils.format_cell({ v: val, t: 'd' });
               } else {
                 entry[key] = String(val || "").trim();
@@ -566,6 +567,30 @@ const App = () => {
 
           if (!hasData) continue;
           if (!entry.date || !entry.id || !entry.branch) continue;
+
+          // --- SIRUS Specific Logic ---
+          if (isSirus) {
+            entry.brand = "AMAZON";
+            
+            // Status Mapping
+            const sirusStatus = String(entry.status || "").toUpperCase();
+            if (sirusStatus === "NOT_SERVICED" || sirusStatus === "PENDING_SCHEDULE") {
+              entry.status = "Open";
+            }
+
+            // Aging calculation from receiptDate
+            if (entry.receiptDate) {
+              const rDate = new Date(entry.receiptDate);
+              const today = new Date();
+              if (!isNaN(rDate.getTime())) {
+                const diffTime = Math.abs(today - rDate);
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                entry.aging = diffDays;
+              }
+            }
+          }
+          // ----------------------------
+
           if (user.role !== "ADMIN") {
             const uRole = String(user.role).toLowerCase();
             const eBranch = String(entry.branch).toLowerCase();

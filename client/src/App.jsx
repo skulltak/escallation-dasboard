@@ -468,6 +468,13 @@ const App = () => {
         await axios.put(`${API_URL}/${editingId}`, formData);
         showToast('Updated successfully', 'success');
       } else {
+        // --- Duplicate Check for New Entry ---
+        const existingIds = new Set(data.map(d => String(d.id).trim()));
+        if (existingIds.has(String(formData.id).trim())) {
+          showToast(`Duplicate Service Order ID: ${formData.id} already exists.`, 'warning', 7000);
+          return;
+        }
+        // -------------------------------------
         await axios.post(API_URL, formData);
         showToast('Saved successfully', 'success');
       }

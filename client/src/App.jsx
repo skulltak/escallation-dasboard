@@ -945,7 +945,7 @@ const App = () => {
         </div>
       </aside>
 
-      <main className={`main-content ${loading ? 'opacity-50' : ''}`}>
+      <main className={`main-content ${!isSidebarCollapsed ? 'sidebar-open' : ''} ${loading ? 'opacity-50' : ''}`}>
         <header className="top-bar">
           <div className="flex flex-col">
             <h2 className="page-title">{view === 'dashboard' ? 'Overview' : 'Reports'}</h2>

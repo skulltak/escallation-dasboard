@@ -587,7 +587,7 @@ p {
   gap: 20px;
 }
 
-.dashboard-body-container.sidebar-open .metrics-grid {
+.sidebar-open .metrics-grid {
   grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
   gap: 12px;
 }
@@ -614,11 +614,11 @@ p {
   transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
-.dashboard-body-container.sidebar-open .stat-card {
-  padding: 0.5rem 0.75rem;
+.sidebar-open .stat-card {
+  padding: 1rem 0.75rem;
 }
 
-.dashboard-body-container.sidebar-open .stat-card h4 {
+.sidebar-open .stat-card h4 {
   font-size: 0.75rem;
 }
 
@@ -638,7 +638,7 @@ p {
   -webkit-text-fill-color: transparent;
 }
 
-.dashboard-body-container.sidebar-open .value {
+.sidebar-open .value {
   font-size: 1.5rem;
 }
 
@@ -683,12 +683,12 @@ p {
 }
 
 /* Sidebar open: 2 columns on top, 3rd chart full-width + centered below */
-.charts-grid.sidebar-open {
+.sidebar-open .charts-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
 
-.charts-grid.sidebar-open > :nth-child(3) {
+.sidebar-open .charts-grid > :nth-child(3) {
   grid-column: 1 / -1;
   width: 80%;
   margin: 0 auto;

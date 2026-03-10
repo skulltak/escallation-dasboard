@@ -28,7 +28,7 @@ console.error = (...args) => { logs.push(`[ERR] ${args.join(' ')}`); if (logs.le
 
 // API Routes
 app.get('/health', (req, res) => res.send('OK'));
-app.get('/api/info', (req, res) => res.json({ version: 'v4.9.1', limit: '50mb', db_status: mongoose.connection.readyState, time: new Date().toISOString() }));
+app.get('/api/info', (req, res) => res.json({ version: 'v4.9.2', limit: '50mb', db_status: mongoose.connection.readyState, time: new Date().toISOString() }));
 app.get('/api/logs', (req, res) => res.send(logs.join('\n')));
 
 app.get('/api/escalations', async (req, res) => {

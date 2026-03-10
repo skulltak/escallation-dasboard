@@ -141,6 +141,13 @@ const startServer = async () => {
         const uri = urlEnv || uriEnv;
         
         console.log(`📡 DB Connection Attempt: Using ${urlEnv ? 'MONGO_URL' : (uriEnv ? 'MONGO_URI' : 'NONE')}`);
+        
+        // Explicit Event Listeners
+        mongoose.connection.on('error', err => console.error('🔴 Mongoose Connection Error Event:', err.message));
+        mongoose.connection.on('disconnected', () => console.warn('🟠 Mongoose Disconnected Event'));
+        mongoose.connection.on('connected', () => console.log('🟢 Mongoose Connected Event'));
+        mongoose.connection.on('reconnected', () => console.log('🔵 Mongoose Reconnected Event'));
+
         if (!uri) {
             console.error("❌ CRITICAL: No Database URI found in environment variables.");
             return;
@@ -149,8 +156,8 @@ const startServer = async () => {
         console.log(`🔗 URI Preview: ${uri.substring(0, 15)}... (Length: ${uri.length})`);
         
         await mongoose.connect(uri, { 
-            serverSelectionTimeoutMS: 10000,
-            connectTimeoutMS: 10000
+            serverSelectionTimeoutMS: 30000,
+            connectTimeoutMS: 30000
         });
         console.log('✅ MongoDB Connected Successfully');
     } catch (err) {

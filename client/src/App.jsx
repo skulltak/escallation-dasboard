@@ -549,13 +549,20 @@ const App = () => {
         // Smart Header Search: Find the first row that has at least 3 recognizable headers
         let headerRowIndex = -1;
         let fileHeaders = [];
-        const sirusIndicators = ['job status', 'escalation id', 'escallation', 'escalltion', 'service order id', 'sirus id'];
+        const sirusIndicators = ['job status', 'escalation id', 'escallation', 'escalltion', 'service order id', 'sirus id', 'job no'];
 
-        for (let i = 0; i < Math.min(rows.length, 20); i++) {
+        for (let i = 0; i < Math.min(rows.length, 100); i++) {
           const row = rows[i];
-          if (!Array.isArray(row)) continue;
+          if (!Array.isArray(row) || row.length === 0) continue;
+          
           const candidateHeaders = row.map(h => String(h || "").trim().toLowerCase());
-          const matchCount = candidateHeaders.filter(h => !!HEADER_MAP[h]).length;
+          const matchedKeys = candidateHeaders.filter(h => !!HEADER_MAP[h]);
+          const matchCount = matchedKeys.length;
+
+          // Diagnostic log to find the header row
+          if (matchCount > 0) {
+            console.log(`[Import Debug] Row ${i} Match Score: ${matchCount}`, matchedKeys);
+          }
           
           if (matchCount >= 3) {
             headerRowIndex = i;

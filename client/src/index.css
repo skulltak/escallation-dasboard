@@ -562,12 +562,28 @@ p {
   border-radius: 3px;
 }
 
-/* Stats */
+/* Dashboard body wrapper */
+.dashboard-body-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Stats / Metrics Row */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 20px;
+}
+
+/* keep old stats-grid as fallback alias */
 .stats-grid {
   display: flex;
   justify-content: space-between;
   gap: 24px;
-  margin-bottom: 2rem;
+  margin-bottom: 0;
 }
 
 .stat-card {

@@ -974,8 +974,9 @@ const App = () => {
         <div className="view-transition-active">
           {view === 'dashboard' ? (
             <div className="dashboard-scroll">
+              <div className="dashboard-body-container">
               {loading ? <SkeletonStats /> : (
-                <div className="stats-grid">
+                <div className="metrics-grid">
                   <div className="stat-card">
                     <div className="stat-info">
                       <h4>Total Cases</h4>
@@ -1016,7 +1017,7 @@ const App = () => {
                 </div>
               )}
 
-              <div className={`charts-grid ${!isSidebarCollapsed ? 'sidebar-open' : ''} ${loading ? 'opacity-20' : ''}`}>
+              <div className={`charts-grid ${loading ? 'opacity-20' : ''}`}>
                 <div className="chart-card">
                   <h3>Status</h3>
                   <div className="chart-container">
@@ -1095,8 +1096,9 @@ const App = () => {
                   </div>
                 </div>
               </div>
+            </div>
 
-              {loading || importing ? <SkeletonTable /> : (
+            {loading || importing ? <SkeletonTable /> : (
                 <div className="table-section">
                   <div className="table-header">
                     <div className="flex items-center gap-4">

@@ -1041,7 +1041,7 @@ const App = () => {
                 <div className="chart-card">
                   <h3>{user?.role === 'ADMIN' ? 'Branch Wise Escalation' : 'Case Aging'}</h3>
                   <div className="chart-container chart-scroll-container" style={{ overflowX: 'auto', overflowY: 'hidden', display: 'block', paddingBottom: '10px' }}>
-                    <div style={{ width: `${Math.max(100, (user?.role === 'ADMIN' ? chartData.labels.length : agingBarData.labels.length) * 60)}px`, height: '300px', position: 'relative' }}>
+                    <div style={{ width: `${Math.max(100, (user?.role === 'ADMIN' ? chartData.labels.length : agingBarData.labels.length) * 60)}px`, height: '100%', position: 'relative' }}>
                       <Bar
                         ref={user?.role !== 'ADMIN' ? agingChartRef : null}
                         onClick={user?.role !== 'ADMIN' ? handleAgingChartClick : undefined}

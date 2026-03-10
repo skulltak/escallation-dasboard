@@ -170,7 +170,7 @@ const App = () => {
   const [filters, setFilters] = useState({
     search: '',
     date: '',
-    escDate: '',
+    closedDate: '',
     branch: '',
     status: '',
     aging: '',
@@ -192,7 +192,7 @@ const App = () => {
     id: '',
     branch: '',
     brand: '',
-    escDate: '',
+    closedDate: '',
     serviceType: '',
     reason: '',
     city: '',
@@ -318,10 +318,10 @@ const App = () => {
         return false;
       })();
 
-      const matchesEscDate = deferredFilters.escDate === "" || (() => {
-        if (!d.escDate) return false;
-        const dbDateStr = String(d.escDate).trim();
-        const searchDate = deferredFilters.escDate;
+      const matchesClosedDate = deferredFilters.closedDate === "" || (() => {
+        if (!d.closedDate) return false;
+        const dbDateStr = String(d.closedDate).trim();
+        const searchDate = deferredFilters.closedDate;
         const dbParts = dbDateStr.split('-');
         if (dbParts.length !== 3) return dbDateStr.includes(searchDate);
         let y, dPart, mPart;
@@ -339,7 +339,7 @@ const App = () => {
       const matchesBrand = deferredFilters.brand === "" || String(d.brand || "").toLowerCase().includes(String(deferredFilters.brand).toLowerCase());
       const matchesServiceType = deferredFilters.serviceType === "" || String(d.serviceType || "").toLowerCase() === String(deferredFilters.serviceType).toLowerCase();
 
-      return matchesSearch && matchesStatus && matchesBranch && matchesDate && matchesEscDate && matchesAging && matchesBrand && matchesServiceType;
+      return matchesSearch && matchesStatus && matchesBranch && matchesDate && matchesClosedDate && matchesAging && matchesBrand && matchesServiceType;
     });
   }, [data, deferredFilters, user]);
 
@@ -451,7 +451,7 @@ const App = () => {
       id: '',
       branch: user?.role !== 'ADMIN' ? user.role : '',
       brand: '',
-      escDate: '',
+      closedDate: '',
       serviceType: '',
       reason: '',
       city: '',
@@ -613,8 +613,8 @@ const App = () => {
 
   const handleExport = () => {
     if (!filteredData.length) return showToast("No data to export");
-    const columns = ["date", "escDate", "id", "branch", "brand", "reason", "city", "aging", "status", "remark"];
-    const headers = ["Date", "ESC Date", "ID", "Branch", "Brand", "Reason", "City", "Aging", "Status", "Remark"];
+    const columns = ["date", "closedDate", "id", "branch", "brand", "reason", "city", "aging", "status", "remark"];
+    const headers = ["Date", "Closed Date", "ID", "Branch", "Brand", "Reason", "City", "Aging", "Status", "Remark"];
 
     let csv = headers.join(",") + "\n";
     filteredData.forEach(row => {
@@ -1134,12 +1134,12 @@ const App = () => {
                         />
                       </div>
                       <div className="flex flex-col gap-0.5">
-                        <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', marginLeft: '4px' }}>ESC Date</span>
+                        <span style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', marginLeft: '4px' }}>Closed Date</span>
                         <input
                           type="date"
                           className="btn-sm"
-                          value={filters.escDate}
-                          onChange={(e) => setFilters({ ...filters, escDate: e.target.value })}
+                          value={filters.closedDate}
+                          onChange={(e) => setFilters({ ...filters, closedDate: e.target.value })}
                         />
                       </div>
                       <select className="btn-sm" value={filters.status} onChange={(e) => setFilters({ ...filters, status: e.target.value })}>
@@ -1189,7 +1189,7 @@ const App = () => {
                       <thead>
                         <tr>
                           <th>Date</th>
-                          <th>ESC Date</th>
+                          <th>Closed Date</th>
                           <th>Branch</th>
                           <th>Aging</th>
                           <th>Brand</th>
@@ -1204,7 +1204,7 @@ const App = () => {
                         {filteredData.map(row => (
                           <tr key={row._id}>
                             <td>{formatDisplayDate(row.date)}</td>
-                            <td>{formatDisplayDate(row.escDate)}</td>
+                            <td>{formatDisplayDate(row.closedDate)}</td>
                             <td>{row.branch}</td>
                             <td>
                               <span className={`badge ${row.aging > 10 ? 'badge-danger' : row.aging > 5 ? 'badge-warning' : 'badge-success'}`}>
@@ -1304,8 +1304,8 @@ const App = () => {
                   <input type="date" required className="form-control" value={formData.date} onChange={(e) => setFormData({ ...formData, date: e.target.value })} />
                 </div>
                 <div className="form-group">
-                  <label>ESC Date (Escalation Date)</label>
-                  <input type="date" className="form-control" value={formData.escDate} onChange={(e) => setFormData({ ...formData, escDate: e.target.value })} />
+                  <label>Closed Date</label>
+                  <input type="date" className="form-control" value={formData.closedDate} onChange={(e) => setFormData({ ...formData, closedDate: e.target.value })} />
                 </div>
                 <div className="form-group">
                   <label>Branch</label>
@@ -1395,7 +1395,7 @@ const App = () => {
                 <thead>
                   <tr>
                     <th>Date</th>
-                    <th>ESC Date</th>
+                    <th>Closed Date</th>
                     <th>Brand</th>
                     <th>ID</th>
                     <th>Action</th>
@@ -1405,7 +1405,7 @@ const App = () => {
                   {selectedAgingCases.map(row => (
                     <tr key={row._id}>
                       <td>{formatDisplayDate(row.date)}</td>
-                      <td>{formatDisplayDate(row.escDate)}</td>
+                      <td>{formatDisplayDate(row.closedDate)}</td>
                       <td>{row.brand}</td>
                       <td>{row.id}</td>
                       <td>

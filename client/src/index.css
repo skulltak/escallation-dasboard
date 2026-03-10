@@ -523,6 +523,7 @@ p {
 
 .main-content {
   flex: 1;
+  min-width: 0;
   background: var(--glass-bg);
   backdrop-filter: blur(16px);
   border: 1px solid var(--glass-border);
@@ -646,13 +647,26 @@ p {
   color: var(--danger);
 }
 
+/* Charts — default: 3 equal columns (sidebar collapsed / full view) */
 .charts-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 20px;
   width: 100%;
   box-sizing: border-box;
-  margin-bottom: 2.5rem;
+  margin-bottom: 2rem;
+}
+
+/* Sidebar open: 2 columns on top, 3rd chart full-width + centered below */
+.charts-grid.sidebar-open {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.charts-grid.sidebar-open > :nth-child(3) {
+  grid-column: 1 / -1;
+  width: 50%;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .chart-card {

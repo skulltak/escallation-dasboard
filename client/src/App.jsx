@@ -1017,7 +1017,7 @@ const App = () => {
                 </div>
               )}
 
-              <div className={`charts-grid ${loading ? 'opacity-20' : ''}`}>
+              <div className={`charts-grid ${!isSidebarCollapsed ? 'sidebar-open' : ''} ${loading ? 'opacity-20' : ''}`}>
                 <div className="chart-card">
                   <h3>Status</h3>
                   <div className="chart-container">

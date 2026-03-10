@@ -28,7 +28,18 @@ console.error = (...args) => { logs.push(`[ERR] ${args.join(' ')}`); if (logs.le
 
 // API Routes
 app.get('/health', (req, res) => res.send('OK'));
-app.get('/api/info', (req, res) => res.json({ version: 'v4.9.2', limit: '50mb', db_status: mongoose.connection.readyState, time: new Date().toISOString() }));
+app.get('/api/info', (req, res) => {
+    const uri = process.env.MONGO_URL || process.env.MONGO_URI || 'UNDEFINED';
+    const maskedUri = uri.length > 20 ? uri.substring(0, 15) + '...' : 'INVALID';
+    res.json({ 
+        version: 'v4.9.2', 
+        limit: '50mb', 
+        db_status: mongoose.connection.readyState, 
+        uri_type: process.env.MONGO_URL ? 'MONGO_URL' : (process.env.MONGO_URI ? 'MONGO_URI' : 'NONE'),
+        uri_preview: maskedUri,
+        time: new Date().toISOString() 
+    });
+});
 app.get('/api/logs', (req, res) => res.send(logs.join('\n')));
 
 app.get('/api/escalations', async (req, res) => {
@@ -125,18 +136,33 @@ app.use((req, res, next) => {
 // Database Connection & Server Start
 const startServer = async () => {
     try {
-        console.log('Connecting to MongoDB...');
-        const uri = process.env.MONGO_URL || process.env.MONGO_URI;
-        if (!uri) throw new Error("MONGO_URL and MONGO_URI are both undefined");
-        await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 });
-        console.log('✅ MongoDB Connected');
+        const urlEnv = process.env.MONGO_URL;
+        const uriEnv = process.env.MONGO_URI;
+        const uri = urlEnv || uriEnv;
+        
+        console.log(`📡 DB Connection Attempt: Using ${urlEnv ? 'MONGO_URL' : (uriEnv ? 'MONGO_URI' : 'NONE')}`);
+        if (!uri) {
+            console.error("❌ CRITICAL: No Database URI found in environment variables.");
+            return;
+        }
+
+        console.log(`🔗 URI Preview: ${uri.substring(0, 15)}... (Length: ${uri.length})`);
+        
+        await mongoose.connect(uri, { 
+            serverSelectionTimeoutMS: 10000,
+            connectTimeoutMS: 10000
+        });
+        console.log('✅ MongoDB Connected Successfully');
     } catch (err) {
         console.error('❌ MongoDB Connection Error:', err.message);
+        if (err.message.includes('timeout')) {
+            console.error('💡 Tip: Your Vercel server cannot reach the DB. Check if your MONGO_URI is correct and has no typos.');
+        }
     }
 
     if (require.main === module) {
         app.listen(PORT, '0.0.0.0', () => {
-            console.log(`🚀 Escalation Dashboard v4.9.1 - Live on port ${PORT}`);
+            console.log(`🚀 Escalation Dashboard v4.9.2 - Live on port ${PORT}`);
         });
     }
 };

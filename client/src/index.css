@@ -548,6 +548,10 @@ p {
   z-index: 20;
 }
 
+.sidebar-open .top-bar {
+  padding: 0 16px;
+}
+
 .dashboard-scroll {
   flex: 1;
   overflow-y: auto;
@@ -584,7 +588,7 @@ p {
 }
 
 .dashboard-body-container.sidebar-open .metrics-grid {
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
   gap: 12px;
 }
 
@@ -611,7 +615,11 @@ p {
 }
 
 .dashboard-body-container.sidebar-open .stat-card {
-  padding: 0.75rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.dashboard-body-container.sidebar-open .stat-card h4 {
+  font-size: 0.75rem;
 }
 
 .stat-card:hover {
@@ -703,8 +711,13 @@ p {
 }
 
 .sidebar-open .chart-card {
-  padding: 0.75rem;
-  height: 350px;
+  padding: 0.5rem;
+  height: 320px;
+}
+
+.sidebar-open .chart-card h3 {
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
 }
 
 .chart-container {

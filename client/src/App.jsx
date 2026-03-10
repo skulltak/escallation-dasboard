@@ -131,7 +131,7 @@ class ErrorBoundary extends React.Component {
 
 const ParticleBackground = () => {
   return (
-    <div className="fixed inset-0 overflow-hidden" style={{ zIndex: -1, pointerEvents: 'none' }}>
+    <div className="fixed inset-0 overflow-hidden z-minus-1" style={{ pointerEvents: 'none' }}>
       <div className="floating-blob blob-1" />
       <div className="floating-blob blob-2" />
       <div className="floating-blob blob-3" />
@@ -222,11 +222,18 @@ const App = () => {
   useEffect(() => {
     const savedUser = sessionStorage.getItem('appUser');
     if (savedUser) {
-      const parsed = JSON.parse(savedUser);
-      setUser(parsed);
-      if (parsed.role !== 'ADMIN') {
-        setFilters(prev => ({ ...prev, branch: parsed.role }));
-        setFormData(prev => ({ ...prev, branch: parsed.role }));
+      try {
+        const parsed = JSON.parse(savedUser);
+        if (parsed && typeof parsed === 'object') {
+          setUser(parsed);
+          if (parsed.role !== 'ADMIN') {
+            setFilters(prev => ({ ...prev, branch: parsed.role }));
+            setFormData(prev => ({ ...prev, branch: parsed.role }));
+          }
+        }
+      } catch (e) {
+        console.error("Session parse error:", e);
+        sessionStorage.removeItem('appUser');
       }
     }
   }, []);
@@ -271,85 +278,94 @@ const App = () => {
 
   // Helper: Filtered Data
   const filteredData = useMemo(() => {
-    let result = data;
-    if (user && user.role !== 'ADMIN') {
-      const uRole = String(user.role).trim().toLowerCase();
-      result = result.filter(d => {
+    try {
+      let result = data;
+      if (user && user.role !== 'ADMIN') {
+        const uRole = String(user.role).trim().toLowerCase();
+        result = result.filter(d => {
+          const dBranch = String(d.branch || "").trim().toLowerCase();
+          if (uRole === 'bangalore') {
+            return dBranch === 'bangalore' || dBranch === 'ro kar';
+          }
+          return dBranch === uRole;
+        });
+      }
+
+      return result.filter(d => {
+        const matchesSearch = deferredFilters.search === "" || Object.values(d).some(v => String(v || "").toLowerCase().includes(deferredFilters.search.toLowerCase()));
+        const matchesStatus = deferredFilters.status === "" || String(d.status || "").toLowerCase() === String(deferredFilters.status).toLowerCase();
+
         const dBranch = String(d.branch || "").trim().toLowerCase();
-        if (uRole === 'bangalore') {
-          return dBranch === 'bangalore' || dBranch === 'ro kar';
-        }
-        return dBranch === uRole;
+        const fBranch = String(deferredFilters.branch || "").trim().toLowerCase();
+        const matchesBranch = fBranch === "" || dBranch === fBranch;
+
+        const matchesDate = deferredFilters.date === "" || (() => {
+          if (!d.date) return false;
+          const dbDateStr = String(d.date).trim();
+          const searchDate = deferredFilters.date; // YYYY-MM-DD from picker
+
+          // 1. Precise components
+          const dbParts = dbDateStr.split('-');
+          if (dbParts.length !== 3) return dbDateStr.includes(searchDate);
+
+          let y, dPart, mPart;
+          if (dbParts[0].length === 4) {
+            [y, mPart, dPart] = dbParts;
+          } else {
+            [dPart, mPart, y] = dbParts;
+          }
+
+          const yS = String(y);
+          const mS = String(mPart).padStart(2, '0');
+          const dS = String(dPart).padStart(2, '0');
+
+          // Check searchDate (YYYY-MM-DD from picker) against both interpretations
+          if (`${yS}-${mS}-${dS}` === searchDate) return true; // Standard
+          if (`${yS}-${dS}-${mS}` === searchDate) return true; // Swapped
+
+          return false;
+        })();
+
+        const matchesClosedDate = deferredFilters.closedDate === "" || (() => {
+          if (!d.closedDate) return false;
+          const dbDateStr = String(d.closedDate).trim();
+          const searchDate = deferredFilters.closedDate;
+          const dbParts = dbDateStr.split('-');
+          if (dbParts.length !== 3) return dbDateStr.includes(searchDate);
+          let y, dPart, mPart;
+          if (dbParts[0].length === 4) { [y, mPart, dPart] = dbParts; }
+          else { [dPart, mPart, y] = dbParts; }
+          const yS = String(y);
+          const mS = String(mPart).padStart(2, '0');
+          const dS = String(dPart).padStart(2, '0');
+          if (`${yS}-${mS}-${dS}` === searchDate) return true;
+          if (`${yS}-${dS}-${mS}` === searchDate) return true;
+          return false;
+        })();
+
+        const matchesAging = deferredFilters.aging === "" || String(d.aging || 0) === deferredFilters.aging;
+        const matchesBrand = deferredFilters.brand === "" || String(d.brand || "").toLowerCase().includes(String(deferredFilters.brand).toLowerCase());
+        const matchesServiceType = deferredFilters.serviceType === "" || String(d.serviceType || "").toLowerCase() === String(deferredFilters.serviceType).toLowerCase();
+
+        return matchesSearch && matchesStatus && matchesBranch && matchesDate && matchesClosedDate && matchesAging && matchesBrand && matchesServiceType;
       });
+    } catch (err) {
+      console.error("Filter error:", err);
+      return [];
     }
-
-    return result.filter(d => {
-      const matchesSearch = deferredFilters.search === "" || Object.values(d).some(v => String(v || "").toLowerCase().includes(deferredFilters.search.toLowerCase()));
-      const matchesStatus = deferredFilters.status === "" || String(d.status || "").toLowerCase() === String(deferredFilters.status).toLowerCase();
-
-      const dBranch = String(d.branch || "").trim().toLowerCase();
-      const fBranch = String(deferredFilters.branch || "").trim().toLowerCase();
-      const matchesBranch = fBranch === "" || dBranch === fBranch;
-
-      const matchesDate = deferredFilters.date === "" || (() => {
-        if (!d.date) return false;
-        const dbDateStr = String(d.date).trim();
-        const searchDate = deferredFilters.date; // YYYY-MM-DD from picker
-
-        // 1. Precise components
-        const dbParts = dbDateStr.split('-');
-        if (dbParts.length !== 3) return dbDateStr.includes(searchDate);
-
-        let y, dPart, mPart;
-        if (dbParts[0].length === 4) {
-          [y, mPart, dPart] = dbParts;
-        } else {
-          [dPart, mPart, y] = dbParts;
-        }
-
-        const yS = String(y);
-        const mS = String(mPart).padStart(2, '0');
-        const dS = String(dPart).padStart(2, '0');
-
-        // Check searchDate (YYYY-MM-DD from picker) against both interpretations
-        if (`${yS}-${mS}-${dS}` === searchDate) return true; // Standard
-        if (`${yS}-${dS}-${mS}` === searchDate) return true; // Swapped
-
-        return false;
-      })();
-
-      const matchesClosedDate = deferredFilters.closedDate === "" || (() => {
-        if (!d.closedDate) return false;
-        const dbDateStr = String(d.closedDate).trim();
-        const searchDate = deferredFilters.closedDate;
-        const dbParts = dbDateStr.split('-');
-        if (dbParts.length !== 3) return dbDateStr.includes(searchDate);
-        let y, dPart, mPart;
-        if (dbParts[0].length === 4) { [y, mPart, dPart] = dbParts; }
-        else { [dPart, mPart, y] = dbParts; }
-        const yS = String(y);
-        const mS = String(mPart).padStart(2, '0');
-        const dS = String(dPart).padStart(2, '0');
-        if (`${yS}-${mS}-${dS}` === searchDate) return true;
-        if (`${yS}-${dS}-${mS}` === searchDate) return true;
-        return false;
-      })();
-
-      const matchesAging = deferredFilters.aging === "" || String(d.aging || 0) === deferredFilters.aging;
-      const matchesBrand = deferredFilters.brand === "" || String(d.brand || "").toLowerCase().includes(String(deferredFilters.brand).toLowerCase());
-      const matchesServiceType = deferredFilters.serviceType === "" || String(d.serviceType || "").toLowerCase() === String(deferredFilters.serviceType).toLowerCase();
-
-      return matchesSearch && matchesStatus && matchesBranch && matchesDate && matchesClosedDate && matchesAging && matchesBrand && matchesServiceType;
-    });
   }, [data, deferredFilters, user]);
 
   const selectedAgingCases = useMemo(() => {
-    if (selectedAging === null) return [];
-    return filteredData.filter(d =>
-      String(d.status || '').toLowerCase() !== 'closed' &&
-      String(d.status || '').toLowerCase() !== 'cancelled' &&
-      Number(d.aging || 0) === selectedAging
-    );
+    try {
+      if (selectedAging === null) return [];
+      return filteredData.filter(d =>
+        String(d.status || '').toLowerCase() !== 'closed' &&
+        String(d.status || '').toLowerCase() !== 'cancelled' &&
+        Number(d.aging || 0) === selectedAging
+      );
+    } catch (err) {
+      return [];
+    }
   }, [filteredData, selectedAging]);
 
   // Aging Reminder Popup
@@ -515,9 +531,9 @@ const App = () => {
     const reader = new FileReader();
     reader.onload = async (evt) => {
       try {
-        const data = evt.target.result;
+        const fileResult = evt.target.result;
         // Use readAsArrayBuffer for better binary/Excel support
-        const wb = XLSX.read(data, {
+        const wb = XLSX.read(fileResult, {
           type: 'array',
           cellDates: true, // Automatically parse dates in Excel
           cellNF: false,

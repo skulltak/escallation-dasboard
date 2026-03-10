@@ -105,17 +105,19 @@ app.delete('/api/escalations/:id', async (req, res) => {
 app.get('/health', (req, res) => res.send('OK'));
 
 // Standard Static serving (ROOT dist)
-app.use(express.static(path.join(__dirname, 'dist')));
+const distPath = path.join(__dirname, 'dist');
+app.use(express.static(distPath));
 
-// SPA Catch-all (MUST BE LAST)
+// SPA Catch-all (Only for navigation routes, exclude API and Files)
 app.use((req, res, next) => {
     if (req.url.startsWith('/api')) return next();
-    const indexPath = path.join(__dirname, 'dist', 'index.html');
-    const exists = require('fs').existsSync(indexPath);
+    if (req.path.includes('.')) return next(); // Don't serve index.html for missing assets
+
+    const indexPath = path.join(distPath, 'index.html');
     res.sendFile(indexPath, (err) => {
         if (err) {
-            console.error(`SPA Error (v4.9.1): File exists? ${exists}. Path: ${indexPath}`, err);
-            res.status(404).send(`[Escalation Dashboard v4.9.1] Deployment Sync Error: Frontend files missing. Please ensure the build command succeeded.`);
+            console.error(`SPA Error (v4.9.2): Path: ${indexPath}`, err);
+            res.status(404).send(`[Escalation Dashboard v4.9.2] Sync Error: Frontend files missing.`);
         }
     });
 });

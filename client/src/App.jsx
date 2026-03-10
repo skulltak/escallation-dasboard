@@ -974,7 +974,7 @@ const App = () => {
         <div className="view-transition-active">
           {view === 'dashboard' ? (
             <div className="dashboard-scroll">
-              <div className="dashboard-body-container">
+            <div className={`dashboard-body-container ${!isSidebarCollapsed ? 'sidebar-open' : ''}`}>
               {loading ? <SkeletonStats /> : (
                 <div className="metrics-grid">
                   <div className="stat-card">

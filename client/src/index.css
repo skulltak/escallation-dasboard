@@ -575,8 +575,13 @@ p {
 /* Stats / Metrics Row */
 .metrics-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 20px;
+}
+
+.dashboard-body-container.sidebar-open .metrics-grid {
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
 }
 
 /* keep old stats-grid as fallback alias */
@@ -592,13 +597,17 @@ p {
   width: 100%;
   min-width: 0;
   background: rgba(255, 255, 255, 0.6);
-  padding: 1.75rem;
+  padding: 1.5rem;
   border-radius: 1.25rem;
   border: 1px solid white;
   display: flex;
   align-items: center;
   justify-content: space-between;
   transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.dashboard-body-container.sidebar-open .stat-card {
+  padding: 1rem;
 }
 
 .stat-card:hover {
@@ -608,13 +617,17 @@ p {
 }
 
 .value {
-  font-size: 2.25rem;
+  font-size: 2rem;
   font-weight: 800;
-  margin-top: 0.5rem;
+  margin-top: 0.25rem;
   background: linear-gradient(135deg, var(--text-main) 0%, var(--secondary) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+.dashboard-body-container.sidebar-open .value {
+  font-size: 1.5rem;
 }
 
 .icon-box {
@@ -660,18 +673,19 @@ p {
 /* Sidebar open: 2 columns on top, 3rd chart full-width + centered below */
 .charts-grid.sidebar-open {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 15px;
 }
 
 .charts-grid.sidebar-open > :nth-child(3) {
   grid-column: 1 / -1;
-  width: 50%;
+  width: 60%;
   margin: 0 auto;
   box-sizing: border-box;
 }
 
 .chart-card {
   background: white;
-  padding: 1.5rem;
+  padding: 1.25rem;
   border-radius: 1.25rem;
   box-shadow: var(--shadow-sm);
   border: 1px solid rgba(0, 0, 0, 0.05);
@@ -682,6 +696,11 @@ p {
   box-sizing: border-box;
   min-width: 0;
   overflow: hidden;
+}
+
+.sidebar-open .chart-card {
+  padding: 1rem;
+  height: 380px;
 }
 
 .chart-container {

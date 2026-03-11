@@ -5,6 +5,9 @@ const dotenv = require('dotenv');
 const Escalation = require('./models/Escalation');
 
 const path = require('path');
+const helmet = require('helmet');
+const compression = require('compression');
+const rateLimit = require('express-rate-limit');
 
 dotenv.config();
 
@@ -16,8 +19,22 @@ app.use((req, res, next) => {
     console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
     next();
 });
+app.use(helmet());
+app.use(compression());
 app.use(cors());
-app.use(express.json({ limit: '50mb' }));
+
+// Rate Limiting
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 1000, // Limit each IP to 1000 requests per window
+    message: { message: "Too many requests from this IP, please try again after 15 minutes" },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+app.use('/api/', apiLimiter);
+
+app.use('/api/escalations/bulk', express.json({ limit: '50mb' }));
+app.use(express.json({ limit: '5mb' }));
 
 // Log Capture Shim
 const logs = [];
@@ -44,8 +61,22 @@ app.get('/api/logs', (req, res) => res.send(logs.join('\n')));
 
 app.get('/api/escalations', async (req, res) => {
     try {
-        const escalations = await Escalation.find().sort({ createdAt: -1 });
-        res.status(200).json(escalations);
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 1000;
+        const skip = (page - 1) * limit;
+
+        const total = await Escalation.countDocuments();
+        const escalations = await Escalation.find()
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        res.status(200).json({
+            data: escalations,
+            total,
+            page,
+            pages: Math.ceil(total / limit)
+        });
     } catch (err) {
         console.error("Error fetching escalations:", err);
         res.status(500).json({ message: err.message });

@@ -242,8 +242,8 @@ const App = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(API_URL);
-      setData(res.data);
+      const res = await axios.get(`${API_URL}?limit=2000`);
+      setData(res.data.data || res.data);
 
       // Also check DB status
       try {
